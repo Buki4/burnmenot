@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { Telegraf } from 'telegraf';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: Request) {
   // Security check: ensure the request is from Vercel Cron
   // https://vercel.com/docs/cron-jobs/manage-cron-jobs#securing-cron-jobs
