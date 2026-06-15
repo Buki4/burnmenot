@@ -8,6 +8,12 @@ const STATUSES = ['New', 'In Progress', 'Done'];
 
 export function KanbanBoard({ initialTasks, tracks }: { initialTasks: Task[], tracks: any[] }) {
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
+  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+
+  // Sync tasks when initialTasks change (e.g. from server refresh)
+  React.useEffect(() => {
+    setTasks(initialTasks);
+  }, [initialTasks]);
 
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
     e.dataTransfer.setData('taskId', taskId);
@@ -21,13 +27,20 @@ export function KanbanBoard({ initialTasks, tracks }: { initialTasks: Task[], tr
 
     setDraggedTaskId(null);
 
-    // Optimistically update or just let the server action / sync event handle it
-    // Let's call the API
-    await fetch(`/api/tasks/${taskId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status })
-    });
+    // Optimistic UI update
+    const previousTasks = [...tasks];
+    setTasks(tasks.map(t => t.id === taskId ? { ...t, status } : t));
+
+    try {
+      await fetch(`/api/tasks/${taskId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+    } catch (err) {
+      // Revert on error
+      setTasks(previousTasks);
+    }
   };
 
   const allowDrop = (e: React.DragEvent) => {
@@ -37,7 +50,7 @@ export function KanbanBoard({ initialTasks, tracks }: { initialTasks: Task[], tr
   return (
     <div className="flex-1 flex gap-6 overflow-x-auto pb-4">
       {STATUSES.map(status => {
-        const columnTasks = initialTasks.filter(t => t.status === status);
+        const columnTasks = tasks.filter(t => t.status === status);
         
         return (
           <div 

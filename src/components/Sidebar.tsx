@@ -1,6 +1,12 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export function Sidebar() {
+  const pathname = usePathname();
+  if (pathname === '/login') return null;
+
   return (
     <aside className="w-full md:w-64 bg-slate-900 text-slate-300 md:min-h-screen flex flex-col p-4 md:p-6 shadow-2xl">
       <h1 className="text-2xl md:text-3xl font-extrabold mb-4 md:mb-10 text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-600 tracking-wider">BurnMeNot</h1>

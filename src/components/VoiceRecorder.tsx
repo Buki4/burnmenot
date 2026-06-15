@@ -1,12 +1,18 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 
 export function VoiceRecorder() {
   const [isRecording, setIsRecording] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const pathname = usePathname();
+
+  if (pathname === '/login') {
+    return null;
+  }
 
   const startRecording = async () => {
     try {
@@ -61,6 +67,8 @@ export function VoiceRecorder() {
       setIsUploading(false);
     }
   };
+
+  if (pathname === '/login') return null;
 
   return (
     <div className="fixed bottom-8 right-8 z-50">
