@@ -4,6 +4,7 @@ import "./globals.css";
 import { Sidebar } from "@/components/Sidebar";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
 import { Toaster } from 'react-hot-toast';
+import NextTopLoader from 'nextjs-toploader';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,6 +32,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col md:flex-row text-slate-100 bg-slate-950">
+        <NextTopLoader color="#f97316" showSpinner={false} />
         <Sidebar />
         <Toaster position="bottom-right" toastOptions={{
           style: { background: '#1e293b', color: '#fff', border: '1px solid #334155' }
