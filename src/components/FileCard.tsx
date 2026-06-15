@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useSWRConfig } from 'swr';
 import toast from 'react-hot-toast';
 
 export function FileCard({ file }: { file: any }) {
   const [isDeleting, setIsDeleting] = useState(false);
-  const router = useRouter();
+  const { mutate } = useSWRConfig();
 
   const handleDelete = async () => {
     if (!window.confirm(`Вы уверены, что хотите удалить файл "${file.name}"?`)) return;
@@ -18,7 +18,7 @@ export function FileCard({ file }: { file: any }) {
       });
       if (res.ok) {
         toast.success('Файл удален');
-        router.refresh();
+        mutate('/api/files');
       } else {
         throw new Error('Server error');
       }

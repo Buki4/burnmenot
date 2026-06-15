@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useSWRConfig } from 'swr';
+import toast from 'react-hot-toast';
 
 export function UploadModal({ tracks }: { tracks: any[] }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -9,7 +10,7 @@ export function UploadModal({ tracks }: { tracks: any[] }) {
   const [type, setType] = useState('Demo');
   const [trackId, setTrackId] = useState('');
   const [isUploading, setIsUploading] = useState(false);
-  const router = useRouter();
+  const { mutate } = useSWRConfig();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,17 +23,20 @@ export function UploadModal({ tracks }: { tracks: any[] }) {
     if (trackId) formData.append('trackId', trackId);
 
     try {
-      await fetch('/api/upload', {
+      const res = await fetch('/api/upload', {
         method: 'POST',
         body: formData
       });
+      if (!res.ok) throw new Error('Upload failed');
+      
+      toast.success('Файл загружен');
       setIsOpen(false);
       setFile(null);
       setType('Demo');
       setTrackId('');
-      router.refresh();
+      mutate('/api/files');
     } catch (err) {
-      alert('Ошибка загрузки');
+      toast.error('Ошибка загрузки');
     } finally {
       setIsUploading(false);
     }

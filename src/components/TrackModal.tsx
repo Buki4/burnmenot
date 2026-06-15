@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useSWRConfig } from 'swr';
 import toast from 'react-hot-toast';
 
 export function TrackModal() {
@@ -9,7 +9,7 @@ export function TrackModal() {
   const [name, setName] = useState('');
   const [status, setStatus] = useState('Composition');
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  const { mutate } = useSWRConfig();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +27,7 @@ export function TrackModal() {
     setStatus('Composition');
     setIsLoading(false);
     toast.success('Трек успешно добавлен');
-    router.refresh();
+    mutate('/api/tracks');
   };
 
   return (

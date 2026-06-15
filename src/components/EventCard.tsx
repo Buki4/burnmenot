@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useSWRConfig } from 'swr';
 import toast from 'react-hot-toast';
 
 export function EventCard({ event }: { event: any }) {
-  const router = useRouter();
+  const { mutate } = useSWRConfig();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   
@@ -24,7 +24,7 @@ export function EventCard({ event }: { event: any }) {
       const res = await fetch(`/api/events/${event.id}`, { method: 'DELETE' });
       if (res.ok) {
         toast.success('Событие удалено');
-        router.refresh();
+        mutate('/api/events');
       } else {
         throw new Error('Failed to delete');
       }
@@ -46,7 +46,7 @@ export function EventCard({ event }: { event: any }) {
       if (res.ok) {
         toast.success('Событие обновлено');
         setIsEditOpen(false);
-        router.refresh();
+        mutate('/api/events');
       } else {
         throw new Error('Failed to update');
       }

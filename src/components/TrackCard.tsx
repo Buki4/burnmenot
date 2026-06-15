@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useSWRConfig } from 'swr';
 import toast from 'react-hot-toast';
 
 export function TrackCard({ track }: { track: any }) {
   const [isDeleting, setIsDeleting] = useState(false);
-  const router = useRouter();
+  const { mutate } = useSWRConfig();
 
   const handleDelete = async () => {
     if (!window.confirm(`Вы уверены, что хотите удалить трек "${track.name}" и все его задачи?`)) return;
@@ -17,7 +17,7 @@ export function TrackCard({ track }: { track: any }) {
         method: 'DELETE'
       });
       toast.success('Трек удален');
-      router.refresh();
+      mutate('/api/tracks');
     } catch (err) {
       console.error(err);
       toast.error('Ошибка при удалении');

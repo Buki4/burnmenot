@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useSWRConfig } from 'swr';
 
 export function EventModal() {
   const [isOpen, setIsOpen] = useState(false);
@@ -9,7 +9,7 @@ export function EventModal() {
   const [type, setType] = useState('Rehearsal');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
-  const router = useRouter();
+  const { mutate } = useSWRConfig();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +27,7 @@ export function EventModal() {
     setTitle('');
     setDate('');
     setTime('');
-    router.refresh();
+    mutate('/api/events');
   };
 
   return (

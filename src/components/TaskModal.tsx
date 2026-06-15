@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useSWRConfig } from 'swr';
+import useSWR from 'swr';
+import { fetcher } from '@/lib/fetcher';
 import toast from 'react-hot-toast';
 
 export function TaskModal({ tracks }: { tracks: any[] }) {
@@ -9,8 +11,10 @@ export function TaskModal({ tracks }: { tracks: any[] }) {
   const [description, setDescription] = useState('');
   const [trackId, setTrackId] = useState('');
   const [deadline, setDeadline] = useState('');
+  const [assigneeId, setAssigneeId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  const { mutate } = useSWRConfig();
+  const { data: users } = useSWR('/api/users', fetcher);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,16 +25,18 @@ export function TaskModal({ tracks }: { tracks: any[] }) {
       body: JSON.stringify({
         description,
         trackId: trackId || null,
-        deadline: deadline || null
+        deadline: deadline || null,
+        assigneeId: assigneeId || null
       })
     });
     setIsOpen(false);
     setDescription('');
     setTrackId('');
     setDeadline('');
+    setAssigneeId('');
     setIsLoading(false);
     toast.success('Задача создана');
-    router.refresh();
+    mutate('/api/tasks');
   };
 
   return (
@@ -50,6 +56,13 @@ export function TaskModal({ tracks }: { tracks: any[] }) {
               <div>
                 <label className="block text-sm text-slate-400 mb-1">Описание задачи</label>
                 <input required disabled={isLoading} value={description} onChange={e => setDescription(e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-slate-200 outline-none focus:border-orange-500 disabled:opacity-50" placeholder="Что нужно сделать?" />
+              </div>
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">Ответственный (опционально)</label>
+                <select disabled={isLoading} value={assigneeId} onChange={e => setAssigneeId(e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-slate-200 outline-none focus:border-orange-500 disabled:opacity-50">
+                  <option value="">-- Не назначен --</option>
+                  {users?.map((u: any) => <option key={u.id} value={u.id}>{u.name}</option>)}
+                </select>
               </div>
               <div>
                 <label className="block text-sm text-slate-400 mb-1">Привязать к треку (опционально)</label>

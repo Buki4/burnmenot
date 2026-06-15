@@ -1,14 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useSWRConfig } from 'swr';
+import toast from 'react-hot-toast';
 
 type Task = any;
 
 const STATUSES = ['New', 'In Progress', 'Done'];
 
-import toast from 'react-hot-toast';
-
 export function KanbanBoard({ initialTasks, tracks }: { initialTasks: Task[], tracks: any[] }) {
+  const { mutate } = useSWRConfig();
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
 
@@ -26,6 +27,7 @@ export function KanbanBoard({ initialTasks, tracks }: { initialTasks: Task[], tr
     try {
       await fetch(`/api/tasks/${taskId}`, { method: 'DELETE' });
       toast.success('Задача удалена');
+      mutate('/api/tasks');
     } catch (err) {
       setTasks(previousTasks);
       toast.error('Ошибка при удалении');
@@ -54,6 +56,7 @@ export function KanbanBoard({ initialTasks, tracks }: { initialTasks: Task[], tr
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status })
       });
+      mutate('/api/tasks');
     } catch (err) {
       // Revert on error
       setTasks(previousTasks);
@@ -88,6 +91,12 @@ export function KanbanBoard({ initialTasks, tracks }: { initialTasks: Task[], tr
                   className={`bg-slate-800 p-4 rounded-xl shadow-md border border-slate-700 cursor-grab active:cursor-grabbing hover:border-orange-500/50 transition-colors group ${draggedTaskId === task.id ? 'opacity-50' : ''}`}
                 >
                   <p className="text-slate-200 font-medium mb-2">{task.description}</p>
+                  {task.assignee && (
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="w-5 h-5 bg-orange-500/20 text-orange-400 flex items-center justify-center rounded-full text-xs font-bold">{task.assignee.name.charAt(0)}</span>
+                      <span className="text-xs text-slate-400">{task.assignee.name}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between items-center text-xs text-slate-400 mt-2">
                     <span className="bg-slate-900 px-2 py-1 rounded-md">{task.track?.name || 'Без трека'}</span>
                     <div className="flex items-center gap-2">
