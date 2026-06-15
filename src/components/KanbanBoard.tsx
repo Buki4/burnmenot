@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useSWRConfig } from 'swr';
 import toast from 'react-hot-toast';
+import { EditTaskModal } from './EditTaskModal';
 
 type Task = any;
 
@@ -11,6 +12,7 @@ const STATUSES = ['New', 'In Progress', 'Done'];
 export function KanbanBoard({ initialTasks, tracks }: { initialTasks: Task[], tracks: any[] }) {
   const { mutate } = useSWRConfig();
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
 
   // Sync tasks when initialTasks change (e.g. from server refresh)
@@ -99,14 +101,25 @@ export function KanbanBoard({ initialTasks, tracks }: { initialTasks: Task[], tr
                   )}
                   <div className="flex justify-between items-center text-xs text-slate-400 mt-2">
                     <span className="bg-slate-900 px-2 py-1 rounded-md">{task.track?.name || 'Без трека'}</span>
-                    <div className="flex items-center gap-2">
-                      <span>{task.deadline ? new Date(task.deadline).toLocaleDateString() : 'Без срока'}</span>
+                    <div className="flex items-center gap-1">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingTask(task);
+                        }}
+                        className="p-1 text-slate-500 hover:text-emerald-400 transition-colors opacity-0 group-hover:opacity-100 bg-slate-900 rounded border border-slate-700 hover:border-emerald-500/50"
+                        title="Редактировать задачу"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
                           handleDeleteTask(task.id);
                         }}
-                        className="text-slate-500 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                        className="p-1 text-slate-500 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 bg-slate-900 rounded border border-slate-700 hover:border-red-500/50"
                         title="Удалить задачу"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -126,6 +139,14 @@ export function KanbanBoard({ initialTasks, tracks }: { initialTasks: Task[], tr
           </div>
         );
       })}
+
+      {editingTask && (
+        <EditTaskModal 
+          task={editingTask} 
+          tracks={tracks} 
+          onClose={() => setEditingTask(null)} 
+        />
+      )}
     </div>
   );
 }

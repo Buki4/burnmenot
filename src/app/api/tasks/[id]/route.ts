@@ -11,8 +11,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     data: {
       status: body.status,
       description: body.description,
-      deadline: body.deadline ? new Date(body.deadline) : undefined,
-      assigneeId: body.assigneeId
+      deadline: body.deadline === null ? null : (body.deadline ? new Date(body.deadline) : undefined),
+      assigneeId: body.assigneeId === null ? null : body.assigneeId,
+      trackId: body.trackId === null ? null : body.trackId
     },
     include: { assignee: true, track: true }
   });
