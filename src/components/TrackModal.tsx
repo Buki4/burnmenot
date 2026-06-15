@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 export function TrackModal() {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,6 +26,7 @@ export function TrackModal() {
     setName('');
     setStatus('Composition');
     setIsLoading(false);
+    toast.success('Трек успешно добавлен');
     router.refresh();
   };
 

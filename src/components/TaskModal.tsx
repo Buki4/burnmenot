@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 export function TaskModal({ tracks }: { tracks: any[] }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -28,6 +29,7 @@ export function TaskModal({ tracks }: { tracks: any[] }) {
     setTrackId('');
     setDeadline('');
     setIsLoading(false);
+    toast.success('Задача создана');
     router.refresh();
   };
 

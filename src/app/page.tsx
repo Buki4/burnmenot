@@ -23,6 +23,11 @@ export default async function Dashboard() {
     take: 5
   });
 
+  const recentTracks = await prisma.track.findMany({
+    orderBy: { createdAt: 'desc' },
+    take: 5
+  });
+
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('ru-RU', {
       day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'
@@ -34,7 +39,7 @@ export default async function Dashboard() {
       <RealtimeRefresher />
       <h1 className="text-4xl font-bold mb-8">Дашборд</h1>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         
         {/* Active Tasks Card */}
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
@@ -91,6 +96,25 @@ export default async function Dashboard() {
                   {file.type === 'VoiceNote' && (
                     <audio src={file.path} controls className="h-8 w-24 scale-75 origin-right ml-2" />
                   )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Recent Tracks Card */}
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+          <h2 className="text-2xl font-semibold mb-4 text-rose-400">Новые треки</h2>
+          {recentTracks.length === 0 ? (
+            <p className="text-slate-500">Треков пока нет.</p>
+          ) : (
+            <ul className="space-y-3">
+              {recentTracks.map(track => (
+                <li key={track.id} className="bg-slate-800 p-3 rounded-lg flex justify-between items-center transition-all hover:bg-slate-750">
+                  <p className="font-medium text-slate-200 truncate pr-2" title={track.name}>{track.name}</p>
+                  <span className="px-2 py-1 text-xs rounded-full font-medium bg-slate-700 text-slate-300 border border-slate-600 whitespace-nowrap">
+                    {track.status}
+                  </span>
                 </li>
               ))}
             </ul>

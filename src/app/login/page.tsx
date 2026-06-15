@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 export default function LoginPage() {
   const [password, setPassword] = useState('');
@@ -38,8 +39,8 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-950 p-4">
       <div className="w-full max-w-sm bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-600 mb-2">BurnMeNot</h1>
+        <div className="text-center mb-8 flex flex-col items-center">
+          <Image src="/logo.png" alt="BurnMeNot" width={240} height={100} className="w-auto h-20 mb-4 object-contain" priority />
           <p className="text-slate-400">Введите пароль группы</p>
         </div>
         

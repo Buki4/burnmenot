@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 export function TrackCard({ track }: { track: any }) {
   const [isDeleting, setIsDeleting] = useState(false);
@@ -15,9 +16,11 @@ export function TrackCard({ track }: { track: any }) {
       await fetch(`/api/tracks/${track.id}`, {
         method: 'DELETE'
       });
+      toast.success('Трек удален');
       router.refresh();
     } catch (err) {
       console.error(err);
+      toast.error('Ошибка при удалении');
       setIsDeleting(false);
     }
   };
