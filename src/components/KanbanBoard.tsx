@@ -85,7 +85,7 @@ export function KanbanBoard({ initialTasks, tracks }: { initialTasks: Task[], tr
                   key={task.id}
                   draggable
                   onDragStart={(e) => handleDragStart(e, task.id)}
-                  className={`bg-slate-800 p-4 rounded-xl shadow-md border border-slate-700 cursor-grab active:cursor-grabbing hover:border-orange-500/50 transition-colors ${draggedTaskId === task.id ? 'opacity-50' : ''}`}
+                  className={`bg-slate-800 p-4 rounded-xl shadow-md border border-slate-700 cursor-grab active:cursor-grabbing hover:border-orange-500/50 transition-colors group ${draggedTaskId === task.id ? 'opacity-50' : ''}`}
                 >
                   <p className="text-slate-200 font-medium mb-2">{task.description}</p>
                   <div className="flex justify-between items-center text-xs text-slate-400 mt-2">

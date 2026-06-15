@@ -38,9 +38,11 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-950 p-4">
-      <div className="w-full max-w-sm bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl">
+      <div className="w-full max-w-sm bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl mt-12">
         <div className="text-center mb-8 flex flex-col items-center">
-          <Image src="/logo.png" alt="BurnMeNot" width={240} height={100} className="w-auto h-20 mb-4 object-contain" priority />
+          <div className="scale-150 mb-8 mt-4">
+            <Image src="/logo.png" alt="BurnMeNot" width={300} height={120} className="w-auto h-24 object-contain" priority />
+          </div>
           <p className="text-slate-400">Введите пароль группы</p>
         </div>
         
