@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id         String   @id @default(uuid())
+  name       String
+  role       String   @default("Performer") // Admin, Performer, Observer
+  telegramId String?
+  tasks      Task[]
+}
+
+model Track {
+  id          String   @id @default(uuid())
+  name        String
+  status      String   @default("Composition") // Composition, Rehearsal, Recording, Done
+  tasks       Task[]
+  files       FileRecord[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  description String
+  deadline    DateTime?
+  status      String   @default("New") // New, In Progress, Done
+  assignee    User?    @relation(fields: [assigneeId], references: [id])
+  assigneeId  String?
+  track       Track?   @relation(fields: [trackId], references: [id])
+  trackId     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Event {
+  id          String   @id @default(uuid())
+  title       String
+  date        DateTime
+  type        String   @default("Rehearsal") // Rehearsal, Recording, Gig
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model FileRecord {
+  id          String   @id @default(uuid())
+  name        String
+  path        String
+  type        String   // Project, VoiceNote, Demo
+  track       Track?   @relation(fields: [trackId], references: [id])
+  trackId     String?
+  createdAt   DateTime @default(now())
+}
