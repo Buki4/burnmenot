@@ -1,42 +1,40 @@
-import prisma from '@/lib/prisma';
-import { RealtimeRefresher } from '@/components/RealtimeRefresher';
+'use client';
 
-export const dynamic = 'force-dynamic';
+import useSWR from 'swr';
+import { fetcher } from '@/lib/fetcher';
 
-export default async function Dashboard() {
-  const activeTasks = await prisma.task.findMany({
-    where: { status: { in: ['New', 'In Progress'] } },
-    include: { assignee: true, track: true },
-    orderBy: { createdAt: 'desc' },
-    take: 5
-  });
+export default function Dashboard() {
+  const { data: tasks } = useSWR('/api/tasks', fetcher);
+  const { data: events } = useSWR('/api/events', fetcher);
+  const { data: files } = useSWR('/api/files', fetcher);
+  const { data: tracks } = useSWR('/api/tracks', fetcher);
 
-  const upcomingEvents = await prisma.event.findMany({
-    where: { date: { gte: new Date() } },
-    orderBy: { date: 'asc' },
-    take: 3
-  });
+  const isLoading = !tasks || !events || !files || !tracks;
 
-  const recentFiles = await prisma.fileRecord.findMany({
-    orderBy: { createdAt: 'desc' },
-    include: { track: true },
-    take: 5
-  });
+  if (isLoading) {
+    return (
+      <div className="w-full h-full min-h-[50vh] flex flex-col items-center justify-center space-y-4 animate-in fade-in duration-500">
+        <div className="relative">
+          <div className="w-16 h-16 border-4 border-slate-800 border-t-orange-500 rounded-full animate-spin"></div>
+        </div>
+        <p className="text-slate-400 font-medium animate-pulse">Синхронизация...</p>
+      </div>
+    );
+  }
 
-  const recentTracks = await prisma.track.findMany({
-    orderBy: { createdAt: 'desc' },
-    take: 5
-  });
+  const activeTasks = tasks.filter((t: any) => t.status === 'New' || t.status === 'In Progress').slice(0, 5);
+  const upcomingEvents = events.filter((e: any) => new Date(e.date) >= new Date()).slice(0, 3);
+  const recentFiles = files.slice(0, 5);
+  const recentTracks = tracks.slice(0, 5);
 
-  const formatDate = (date: Date) => {
+  const formatDate = (date: Date | string) => {
     return new Intl.DateTimeFormat('ru-RU', {
       day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'
-    }).format(date);
+    }).format(new Date(date));
   };
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <RealtimeRefresher />
       <h1 className="text-4xl font-bold mb-8">Дашборд</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
@@ -48,7 +46,7 @@ export default async function Dashboard() {
             <p className="text-slate-500">Нет активных задач. Время отдыхать! 🎸</p>
           ) : (
             <ul className="space-y-3">
-              {activeTasks.map(task => (
+              {activeTasks.map((task: any) => (
                 <li key={task.id} className="bg-slate-800 p-3 rounded-lg flex justify-between items-center transition-all hover:bg-slate-750">
                   <div>
                     <p className="font-medium text-slate-200">{task.description}</p>
@@ -70,7 +68,7 @@ export default async function Dashboard() {
             <p className="text-slate-500">Событий не запланировано.</p>
           ) : (
             <ul className="space-y-3">
-              {upcomingEvents.map(event => (
+              {upcomingEvents.map((event: any) => (
                 <li key={event.id} className="bg-slate-800 p-3 rounded-lg border-l-4 border-emerald-500">
                   <p className="font-medium text-slate-200">{event.title}</p>
                   <p className="text-xs text-slate-400 mt-1">{formatDate(event.date)} • {event.type}</p>
@@ -87,7 +85,7 @@ export default async function Dashboard() {
             <p className="text-slate-500">Файлов пока нет.</p>
           ) : (
             <ul className="space-y-3">
-              {recentFiles.map(file => (
+              {recentFiles.map((file: any) => (
                 <li key={file.id} className="bg-slate-800 p-3 rounded-lg flex items-center justify-between">
                   <div className="truncate">
                     <p className="font-medium text-slate-200 truncate">{file.name}</p>
@@ -109,7 +107,7 @@ export default async function Dashboard() {
             <p className="text-slate-500">Треков пока нет.</p>
           ) : (
             <ul className="space-y-3">
-              {recentTracks.map(track => (
+              {recentTracks.map((track: any) => (
                 <li key={track.id} className="bg-slate-800 p-3 rounded-lg flex justify-between items-center transition-all hover:bg-slate-750">
                   <p className="font-medium text-slate-200 truncate pr-2" title={track.name}>{track.name}</p>
                   <span className="px-2 py-1 text-xs rounded-full font-medium bg-slate-700 text-slate-300 border border-slate-600 whitespace-nowrap">
