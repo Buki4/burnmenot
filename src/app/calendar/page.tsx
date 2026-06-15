@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma';
 import { RealtimeRefresher } from '@/components/RealtimeRefresher';
+import { EventCard } from '@/components/EventCard';
 
 export const dynamic = 'force-dynamic';
 import { EventModal } from '@/components/EventModal';
@@ -19,20 +20,9 @@ export default async function CalendarPage() {
 
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex-1">
         <ul className="space-y-4">
-          {events.map((event) => {
-            const isPast = event.date < new Date();
-            return (
-              <li key={event.id} className={`flex items-center justify-between p-4 rounded-xl border ${isPast ? 'border-slate-800 opacity-50 bg-slate-950' : 'border-emerald-500/30 bg-slate-800 hover:bg-slate-750 transition-colors'}`}>
-                <div>
-                  <h3 className="text-xl font-semibold text-slate-200">{event.title}</h3>
-                  <p className="text-slate-400 text-sm mt-1">{new Intl.DateTimeFormat('ru-RU', { dateStyle: 'full', timeStyle: 'short' }).format(event.date)}</p>
-                </div>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${isPast ? 'bg-slate-800 text-slate-500' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'}`}>
-                  {event.type}
-                </span>
-              </li>
-            );
-          })}
+          {events.map((event) => (
+            <EventCard key={event.id} event={event} />
+          ))}
           {events.length === 0 && <p className="text-slate-500">Нет запланированных событий.</p>}
         </ul>
       </div>
