@@ -8,6 +8,7 @@ export function TrackModal() {
   const [name, setName] = useState('');
   const [status, setStatus] = useState('Composition');
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

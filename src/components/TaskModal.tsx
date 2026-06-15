@@ -9,6 +9,7 @@ export function TaskModal({ tracks }: { tracks: any[] }) {
   const [trackId, setTrackId] = useState('');
   const [deadline, setDeadline] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
