@@ -56,6 +56,7 @@ export function TrackModal() {
                   <option value="Recording">Запись</option>
                   <option value="Mixing">Сведение / Мастеринг</option>
                   <option value="Done">Готово к релизу</option>
+                  <option value="Live Prep">Подготовка к лайвам (Плейбеки, Клик)</option>
                 </select>
               </div>
               <div className="flex justify-end gap-3 mt-6">
