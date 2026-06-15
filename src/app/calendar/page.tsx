@@ -1,5 +1,7 @@
 import prisma from '@/lib/prisma';
 import { RealtimeRefresher } from '@/components/RealtimeRefresher';
+
+export const dynamic = 'force-dynamic';
 import { EventModal } from '@/components/EventModal';
 
 export default async function CalendarPage() {

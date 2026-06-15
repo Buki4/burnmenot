@@ -1,5 +1,7 @@
 import prisma from '@/lib/prisma';
 import { RealtimeRefresher } from '@/components/RealtimeRefresher';
+
+export const dynamic = 'force-dynamic';
 import { KanbanBoard } from '@/components/KanbanBoard';
 import { TaskModal } from '@/components/TaskModal';
 import { TrackModal } from '@/components/TrackModal';

@@ -1,6 +1,8 @@
 import prisma from '@/lib/prisma';
 import { RealtimeRefresher } from '@/components/RealtimeRefresher';
 
+export const dynamic = 'force-dynamic';
+
 export default async function Dashboard() {
   const activeTasks = await prisma.task.findMany({
     where: { status: { in: ['New', 'In Progress'] } },

@@ -1,5 +1,7 @@
 import prisma from '@/lib/prisma';
 import { RealtimeRefresher } from '@/components/RealtimeRefresher';
+
+export const dynamic = 'force-dynamic';
 import { UploadModal } from '@/components/UploadModal';
 
 export default async function StoragePage() {
