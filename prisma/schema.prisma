@@ -23,14 +23,9 @@ model Track {
   id          String   @id @default(uuid())
   name        String
   status      String   @default("Composition") // Composition, Rehearsal, Recording, Done
-  compStartDate DateTime?
-  compEndDate   DateTime?
-  rehStartDate  DateTime?
-  rehEndDate    DateTime?
-  recStartDate  DateTime?
-  recEndDate    DateTime?
   tasks       Task[]
   files       FileRecord[]
+  stages      TrackStage[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -65,4 +60,15 @@ model FileRecord {
   track       Track?   @relation(fields: [trackId], references: [id])
   trackId     String?
   createdAt   DateTime @default(now())
+}
+
+model TrackStage {
+  id          String   @id @default(uuid())
+  trackId     String
+  track       Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  name        String
+  color       String   @default("emerald")
+  startDate   DateTime?
+  endDate     DateTime?
+  order       Int      @default(0)
 }

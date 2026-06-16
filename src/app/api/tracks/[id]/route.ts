@@ -8,20 +8,43 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   
   try {
     const body = await req.json();
+    
+    // First, update the base track fields
     const updatedTrack = await prisma.track.update({
       where: { id },
       data: {
         name: body.name,
         status: body.status,
-        compStartDate: body.compStartDate !== undefined ? (body.compStartDate ? new Date(body.compStartDate) : null) : undefined,
-        compEndDate: body.compEndDate !== undefined ? (body.compEndDate ? new Date(body.compEndDate) : null) : undefined,
-        rehStartDate: body.rehStartDate !== undefined ? (body.rehStartDate ? new Date(body.rehStartDate) : null) : undefined,
-        rehEndDate: body.rehEndDate !== undefined ? (body.rehEndDate ? new Date(body.rehEndDate) : null) : undefined,
-        recStartDate: body.recStartDate !== undefined ? (body.recStartDate ? new Date(body.recStartDate) : null) : undefined,
-        recEndDate: body.recEndDate !== undefined ? (body.recEndDate ? new Date(body.recEndDate) : null) : undefined,
       }
     });
-    return NextResponse.json(updatedTrack);
+
+    // If stages were provided, recreate them
+    if (body.stages && Array.isArray(body.stages)) {
+      await prisma.trackStage.deleteMany({
+        where: { trackId: id }
+      });
+      
+      if (body.stages.length > 0) {
+        await prisma.trackStage.createMany({
+          data: body.stages.map((stage: any, index: number) => ({
+            trackId: id,
+            name: stage.name,
+            color: stage.color || 'emerald',
+            startDate: stage.startDate ? new Date(stage.startDate) : null,
+            endDate: stage.endDate ? new Date(stage.endDate) : null,
+            order: index
+          }))
+        });
+      }
+    }
+
+    // Fetch the final track with stages to return
+    const finalTrack = await prisma.track.findUnique({
+      where: { id },
+      include: { stages: { orderBy: { order: 'asc' } }, tasks: { include: { assignee: true } }, files: true }
+    });
+
+    return NextResponse.json(finalTrack);
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: 'Failed to update track' }, { status: 500 });

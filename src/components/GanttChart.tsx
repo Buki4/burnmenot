@@ -10,15 +10,16 @@ export function GanttChart({ tracks }: { tracks: any[] }) {
     let max = new Date().getTime() + 45 * DAY_MS;
 
     tracks.forEach(track => {
-      const dates = [
-        track.compStartDate, track.compEndDate,
-        track.rehStartDate, track.rehEndDate,
-        track.recStartDate, track.recEndDate
-      ].filter(Boolean).map(d => new Date(d).getTime());
+      if (track.stages && Array.isArray(track.stages)) {
+        const dates = track.stages
+          .flatMap((s: any) => [s.startDate, s.endDate])
+          .filter(Boolean)
+          .map((d: any) => new Date(d).getTime());
 
-      if (dates.length > 0) {
-        min = Math.min(min, ...dates);
-        max = Math.max(max, ...dates);
+        if (dates.length > 0) {
+          min = Math.min(min, ...dates);
+          max = Math.max(max, ...dates);
+        }
       }
     });
 
@@ -59,10 +60,12 @@ export function GanttChart({ tracks }: { tracks: any[] }) {
     }
   });
 
-  const hasTracksWithDates = tracks.some(t => getColSpan(t.compStartDate, t.compEndDate) || getColSpan(t.rehStartDate, t.rehEndDate) || getColSpan(t.recStartDate, t.recEndDate));
+  const hasTracksWithDates = tracks.some(t => 
+    t.stages && t.stages.some((s: any) => getColSpan(s.startDate, s.endDate))
+  );
 
   return (
-    <div className="overflow-x-auto pb-8 rounded-xl bg-slate-900/50 border border-slate-800 p-6 shadow-xl">
+    <div className="overflow-x-auto pb-8 rounded-xl bg-slate-900/50 border border-slate-800 p-6 shadow-xl custom-scrollbar">
       <div className="min-w-[800px]">
         {/* Timeline Header */}
         <div className="flex ml-48 border-b border-slate-800">
@@ -76,11 +79,11 @@ export function GanttChart({ tracks }: { tracks: any[] }) {
         {/* Tracks Grid */}
         <div className="mt-4 space-y-4">
           {tracks.map(track => {
-            const compSpan = getColSpan(track.compStartDate, track.compEndDate);
-            const rehSpan = getColSpan(track.rehStartDate, track.rehEndDate);
-            const recSpan = getColSpan(track.recStartDate, track.recEndDate);
+            const validStages = track.stages 
+              ? track.stages.map((s: any) => ({ ...s, span: getColSpan(s.startDate, s.endDate) })).filter((s: any) => s.span)
+              : [];
 
-            if (!compSpan && !rehSpan && !recSpan) return null;
+            if (validStages.length === 0) return null;
 
             return (
               <div key={track.id} className="flex group h-12">
@@ -102,33 +105,28 @@ export function GanttChart({ tracks }: { tracks: any[] }) {
                   </div>
 
                   {/* Stage bars */}
-                  {compSpan && (
-                    <div 
-                      className="absolute top-1.5 bottom-1.5 rounded-md bg-blue-500/20 border border-blue-500/50 flex items-center justify-center text-xs text-blue-300 font-medium whitespace-nowrap overflow-hidden hover:bg-blue-500/30 hover:scale-[1.02] hover:z-10 transition-all cursor-pointer shadow-lg shadow-blue-500/10"
-                      style={{ gridColumn: compSpan }}
-                      title={`Сочинение: ${new Date(track.compStartDate).toLocaleDateString('ru-RU')} - ${new Date(track.compEndDate).toLocaleDateString('ru-RU')}`}
-                    >
-                      <span className="px-2 truncate">Сочинение</span>
-                    </div>
-                  )}
-                  {rehSpan && (
-                    <div 
-                      className="absolute top-1.5 bottom-1.5 rounded-md bg-amber-500/20 border border-amber-500/50 flex items-center justify-center text-xs text-amber-300 font-medium whitespace-nowrap overflow-hidden hover:bg-amber-500/30 hover:scale-[1.02] hover:z-10 transition-all cursor-pointer shadow-lg shadow-amber-500/10"
-                      style={{ gridColumn: rehSpan }}
-                      title={`Репетиции: ${new Date(track.rehStartDate).toLocaleDateString('ru-RU')} - ${new Date(track.rehEndDate).toLocaleDateString('ru-RU')}`}
-                    >
-                      <span className="px-2 truncate">Репетиции</span>
-                    </div>
-                  )}
-                  {recSpan && (
-                    <div 
-                      className="absolute top-1.5 bottom-1.5 rounded-md bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center text-xs text-emerald-300 font-medium whitespace-nowrap overflow-hidden hover:bg-emerald-500/30 hover:scale-[1.02] hover:z-10 transition-all cursor-pointer shadow-lg shadow-emerald-500/10"
-                      style={{ gridColumn: recSpan }}
-                      title={`Запись: ${new Date(track.recStartDate).toLocaleDateString('ru-RU')} - ${new Date(track.recEndDate).toLocaleDateString('ru-RU')}`}
-                    >
-                      <span className="px-2 truncate">Запись</span>
-                    </div>
-                  )}
+                  {validStages.map((stage: any) => {
+                    const colorMap: Record<string, string> = {
+                      blue: 'bg-blue-500/20 border-blue-500/50 text-blue-300 hover:bg-blue-500/30 shadow-blue-500/10',
+                      red: 'bg-red-500/20 border-red-500/50 text-red-300 hover:bg-red-500/30 shadow-red-500/10',
+                      orange: 'bg-orange-500/20 border-orange-500/50 text-orange-300 hover:bg-orange-500/30 shadow-orange-500/10',
+                      purple: 'bg-purple-500/20 border-purple-500/50 text-purple-300 hover:bg-purple-500/30 shadow-purple-500/10',
+                      pink: 'bg-pink-500/20 border-pink-500/50 text-pink-300 hover:bg-pink-500/30 shadow-pink-500/10',
+                      emerald: 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/30 shadow-emerald-500/10',
+                    };
+                    const colorClasses = colorMap[stage.color] || colorMap['emerald'];
+
+                    return (
+                      <div 
+                        key={stage.id || stage.name}
+                        className={`absolute top-1.5 bottom-1.5 rounded-md border flex items-center justify-center text-xs font-medium whitespace-nowrap overflow-hidden hover:scale-[1.02] hover:z-10 transition-all cursor-pointer shadow-lg ${colorClasses}`}
+                        style={{ gridColumn: stage.span }}
+                        title={`${stage.name}: ${new Date(stage.startDate).toLocaleDateString('ru-RU')} - ${new Date(stage.endDate).toLocaleDateString('ru-RU')}`}
+                      >
+                        <span className="px-2 truncate">{stage.name}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             );
