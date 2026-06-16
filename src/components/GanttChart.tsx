@@ -148,12 +148,13 @@ function DraggableTrackRow({ track, minDate, maxDate, totalDays, months }: any) 
     if (s > maxDate.getTime() || e < minDate.getTime()) return null;
 
     let startCol = Math.floor((s - minDate.getTime()) / DAY_MS) + 1;
-    let endCol = Math.ceil((e - minDate.getTime()) / DAY_MS) + 2; 
+    let endCol = Math.ceil((e - minDate.getTime()) / DAY_MS) + 1; 
 
     startCol = Math.max(1, startCol);
     endCol = Math.min(totalDays + 1, endCol);
 
-    if (startCol >= endCol) return null;
+    if (startCol >= endCol) endCol = startCol + 1; // ensure at least 1 column
+
     return `${startCol} / ${endCol}`;
   };
 
@@ -191,7 +192,7 @@ function DraggableTrackRow({ track, minDate, maxDate, totalDays, months }: any) 
           return (
             <div 
               key={stage.id || stage.name}
-              className={`absolute top-1.5 bottom-1.5 rounded-md border flex items-center justify-center text-xs font-medium whitespace-nowrap overflow-visible transition-colors cursor-grab active:cursor-grabbing shadow-lg ${colorClasses} ${isDraggingThis ? 'z-20 scale-[1.02] bg-opacity-40' : 'hover:scale-[1.02] hover:z-10'}`}
+              className={`relative row-start-1 h-9 my-auto rounded-md border flex items-center justify-center text-xs font-medium whitespace-nowrap overflow-visible transition-colors cursor-grab active:cursor-grabbing shadow-lg ${colorClasses} ${isDraggingThis ? 'z-20 scale-[1.02] bg-opacity-40' : 'hover:scale-[1.02] hover:z-10'}`}
               style={{ gridColumn: stage.span, userSelect: 'none' }}
               title={`${stage.name}: ${new Date(stage.startDate).toLocaleDateString('ru-RU')} - ${new Date(stage.endDate).toLocaleDateString('ru-RU')}`}
               onPointerDown={(e) => handlePointerDown(e, idx, 'body')}
