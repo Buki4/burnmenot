@@ -51,14 +51,15 @@ function DraggableTrackRow({ track, minDate, maxDate, totalDays, months }: any) 
       }
     }
 
+    let isValid = true;
     for (const s of newStages) {
-      if (new Date(s.startDate).getTime() > new Date(s.endDate).getTime()) {
-        return dragInfo.lastValidStages || dragInfo.initialStages; 
+      if (s.startDate && s.endDate && new Date(s.startDate).getTime() > new Date(s.endDate).getTime()) {
+        isValid = false;
       }
     }
     
-    dragInfo.lastValidStages = newStages;
-    return newStages;
+    if (isValid) dragInfo.lastValidStages = newStages;
+    return dragInfo.lastValidStages || dragInfo.initialStages;
   }, [stages, dragInfo, deltaDays]);
 
   const displayStagesRef = useRef(displayStages);
@@ -67,7 +68,7 @@ function DraggableTrackRow({ track, minDate, maxDate, totalDays, months }: any) 
   }, [displayStages]);
 
   const handlePointerDown = (e: React.PointerEvent, index: number, type: 'left' | 'right' | 'body') => {
-    e.preventDefault();
+    // DO NOT use e.preventDefault() here as it breaks pointermove on many browsers
     e.stopPropagation();
     if (!rowRef.current) return;
     const rect = rowRef.current.getBoundingClientRect();
@@ -77,10 +78,12 @@ function DraggableTrackRow({ track, minDate, maxDate, totalDays, months }: any) 
       index,
       type,
       startX: e.clientX,
-      pixelsPerDay,
+      pixelsPerDay: pixelsPerDay || 10,
       initialStages: JSON.parse(JSON.stringify(stages)),
       lastValidStages: JSON.parse(JSON.stringify(stages))
     });
+
+    document.body.style.cursor = type === 'body' ? 'grabbing' : 'col-resize';
   };
 
   useEffect(() => {
@@ -93,6 +96,7 @@ function DraggableTrackRow({ track, minDate, maxDate, totalDays, months }: any) 
     };
 
     const handlePointerUp = async () => {
+      document.body.style.cursor = '';
       const finalStages = displayStagesRef.current;
       const initial = dragInfo.initialStages;
       
@@ -100,31 +104,32 @@ function DraggableTrackRow({ track, minDate, maxDate, totalDays, months }: any) 
       setDeltaDays(0);
       setStages(finalStages);
 
-      // Only save if something changed
       if (JSON.stringify(finalStages) === JSON.stringify(initial)) return;
 
-      try {
-        await fetch(`/api/tracks/${track.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: track.name,
-            status: track.status,
-            stages: finalStages.map((s: any, i: number) => ({
-              name: s.name,
-              color: s.color,
-              startDate: s.startDate,
-              endDate: s.endDate,
-              order: i
-            }))
-          })
-        });
+      const savePromise = fetch(`/api/tracks/${track.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: track.name,
+          status: track.status,
+          stages: finalStages.map((s: any, i: number) => ({
+            name: s.name,
+            color: s.color,
+            startDate: s.startDate,
+            endDate: s.endDate,
+            order: i
+          }))
+        })
+      }).then(res => {
+        if (!res.ok) throw new Error('Network error');
         mutate('/api/tracks');
-        toast.success('Сроки обновлены');
-      } catch (err) {
-        console.error(err);
-        toast.error('Ошибка сохранения');
-      }
+      });
+
+      toast.promise(savePromise, {
+        loading: 'Сохранение сроков...',
+        success: 'Сроки успешно обновлены!',
+        error: 'Ошибка сохранения'
+      });
     };
 
     window.addEventListener('pointermove', handlePointerMove);
@@ -132,6 +137,7 @@ function DraggableTrackRow({ track, minDate, maxDate, totalDays, months }: any) 
     return () => {
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointerup', handlePointerUp);
+      document.body.style.cursor = '';
     };
   }, [dragInfo, track.id, track.name, track.status, mutate]);
 
