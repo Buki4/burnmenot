@@ -143,12 +143,20 @@ function DraggableTrackRow({ track, minDate, maxDate, totalDays, months }: any) 
 
   const getColSpan = (start: string | null, end: string | null) => {
     if (!start || !end) return null;
-    const s = new Date(start).getTime();
-    const e = new Date(end).getTime();
-    if (s > maxDate.getTime() || e < minDate.getTime()) return null;
+    
+    const sObj = new Date(start);
+    sObj.setHours(0, 0, 0, 0);
+    const s = sObj.getTime();
 
-    let startCol = Math.floor((s - minDate.getTime()) / DAY_MS) + 1;
-    let endCol = Math.ceil((e - minDate.getTime()) / DAY_MS) + 1; 
+    const eObj = new Date(end);
+    eObj.setHours(0, 0, 0, 0);
+    const e = eObj.getTime();
+
+    const minT = minDate.getTime();
+    if (s > maxDate.getTime() || e < minT) return null;
+
+    let startCol = Math.round((s - minT) / DAY_MS) + 1;
+    let endCol = Math.round((e - minT) / DAY_MS) + 1; 
 
     startCol = Math.max(1, startCol);
     endCol = Math.min(totalDays + 1, endCol);
