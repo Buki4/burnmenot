@@ -171,7 +171,10 @@ function DraggableTrackRow({ track, minDate, maxDate, totalDays, months, onEditT
 
   return (
     <div className="flex h-12 relative group/item">
-      <div className="w-48 shrink-0 pr-4 flex items-center gap-2 sticky left-0 bg-[#0f172a] z-20 shadow-[4px_0_12px_rgba(0,0,0,0.5)] group-hover/item:bg-slate-800 transition-colors pl-2">
+      <div 
+        draggable
+        className="w-48 shrink-0 pr-4 flex items-center gap-2 sticky left-0 bg-[#0f172a] z-20 shadow-[4px_0_12px_rgba(0,0,0,0.5)] group-hover/item:bg-slate-800 transition-colors pl-2"
+      >
         <div className="cursor-grab active:cursor-grabbing text-slate-600 hover:text-slate-400 p-1 flex items-center opacity-0 group-hover/item:opacity-100 transition-opacity">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
@@ -359,7 +362,6 @@ export function GanttChart({ tracks, onEditTrack }: { tracks: any[], onEditTrack
           {orderedTracks.map((track, index) => (
             <div
               key={track.id}
-              draggable
               onDragStart={(e) => handleDragStart(e, index)}
               onDragEnter={(e) => handleDragEnter(e, index)}
               onDragEnd={handleDragEnd}
