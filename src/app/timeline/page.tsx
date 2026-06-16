@@ -1,6 +1,7 @@
 'use client';
 
 import useSWR from 'swr';
+import { useState } from 'react';
 import { GanttChart } from '@/components/GanttChart';
 import { TrackModal } from '@/components/TrackModal';
 
@@ -8,6 +9,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function TimelinePage() {
   const { data: tracks, error, isLoading } = useSWR('/api/tracks', fetcher);
+  const [editingTrack, setEditingTrack] = useState<any>(null);
 
   if (error) return <div className="text-red-500">Failed to load tracks</div>;
 
@@ -26,7 +28,12 @@ export default function TimelinePage() {
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
         </div>
       ) : (
-        <GanttChart tracks={tracks} />
+        <>
+          <GanttChart tracks={tracks} onEditTrack={setEditingTrack} />
+          {editingTrack && (
+            <TrackModal trackToEdit={editingTrack} onClose={() => setEditingTrack(null)} />
+          )}
+        </>
       )}
     </div>
   );

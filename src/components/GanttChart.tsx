@@ -12,7 +12,7 @@ const addDays = (dateStr: string, days: number) => {
   return new Date(time).toISOString().split('T')[0];
 };
 
-function DraggableTrackRow({ track, minDate, maxDate, totalDays, months }: any) {
+function DraggableTrackRow({ track, minDate, maxDate, totalDays, months, onEditTrack }: any) {
   const [stages, setStages] = useState(track.stages || []);
   const rowRef = useRef<HTMLDivElement>(null);
   const { mutate } = useSWRConfig();
@@ -171,8 +171,23 @@ function DraggableTrackRow({ track, minDate, maxDate, totalDays, months }: any) 
 
   return (
     <div className="flex group h-12">
-      <div className="w-48 shrink-0 pr-4 flex items-center">
-        <h3 className="text-slate-200 font-medium truncate group-hover:text-emerald-400 transition-colors">{track.name}</h3>
+      <div className="w-48 shrink-0 pr-4 flex items-center gap-2">
+        <h3 
+          className="text-slate-200 font-medium truncate group-hover:text-emerald-400 transition-colors cursor-pointer flex-1"
+          onClick={() => onEditTrack && onEditTrack(track)}
+          title="Редактировать трек"
+        >
+          {track.name}
+        </h3>
+        <button 
+          onClick={() => onEditTrack && onEditTrack(track)}
+          className="text-slate-500 hover:text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity"
+          title="Редактировать"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+        </button>
       </div>
       <div 
         ref={rowRef}
@@ -222,7 +237,7 @@ function DraggableTrackRow({ track, minDate, maxDate, totalDays, months }: any) 
   );
 }
 
-export function GanttChart({ tracks }: { tracks: any[] }) {
+export function GanttChart({ tracks, onEditTrack }: { tracks: any[], onEditTrack?: (track: any) => void }) {
   const { minDate, maxDate } = useMemo(() => {
     let min = new Date().getTime() - 15 * DAY_MS;
     let max = new Date().getTime() + 45 * DAY_MS;
@@ -286,6 +301,7 @@ export function GanttChart({ tracks }: { tracks: any[] }) {
               maxDate={maxDate} 
               totalDays={totalDays} 
               months={months} 
+              onEditTrack={onEditTrack}
             />
           ))}
           
