@@ -53,17 +53,25 @@ export function TrackModal({ trackToEdit, onClose }: { trackToEdit?: any, onClos
     const url = trackToEdit ? `/api/tracks/${trackToEdit.id}` : '/api/tracks';
 
     // Filter out stages to only send dates if they exist, to save DB space and keep it clean
-    // Actually the PUT endpoint expects all stages to recreate them.
+    // For waterfall dates: startDate of stage > 0 is the endDate of previous stage
     const payload = {
       name,
       status,
-      stages: stages.map((s, i) => ({
-        name: s.name,
-        color: s.color,
-        startDate: s.startDate || null,
-        endDate: s.endDate || null,
-        order: i
-      }))
+      stages: stages.map((s, i) => {
+        let computedStartDate = s.startDate;
+        if (i > 0) {
+          const prevStageWithEndDate = stages.slice(0, i).reverse().find(prev => prev.endDate);
+          computedStartDate = prevStageWithEndDate ? prevStageWithEndDate.endDate : stages[0].startDate;
+        }
+
+        return {
+          name: s.name,
+          color: s.color,
+          startDate: computedStartDate || null,
+          endDate: s.endDate || null,
+          order: i
+        };
+      })
     };
 
     await fetch(url, {
@@ -167,9 +175,14 @@ export function TrackModal({ trackToEdit, onClose }: { trackToEdit?: any, onClos
                         </select>
                         <button type="button" onClick={() => removeStage(index)} className="text-red-400 hover:text-red-300 px-1">✕</button>
                       </div>
-                      <div className="flex gap-2 items-center">
-                        <input type="date" value={stage.startDate} onChange={e => updateStage(index, 'startDate', e.target.value)} className="flex-1 bg-slate-800 border border-slate-700 rounded-md p-1.5 text-xs text-slate-200" />
-                        <span className="text-slate-500">-</span>
+                      <div className="flex gap-2 items-center mt-1">
+                        {index === 0 && (
+                          <>
+                            <span className="text-xs text-slate-500 min-w-[50px]">Старт:</span>
+                            <input type="date" value={stage.startDate} onChange={e => updateStage(index, 'startDate', e.target.value)} className="flex-1 bg-slate-800 border border-slate-700 rounded-md p-1.5 text-xs text-slate-200" />
+                          </>
+                        )}
+                        <span className="text-xs text-slate-500 min-w-[50px] pl-2">Дедлайн:</span>
                         <input type="date" value={stage.endDate} onChange={e => updateStage(index, 'endDate', e.target.value)} className="flex-1 bg-slate-800 border border-slate-700 rounded-md p-1.5 text-xs text-slate-200" />
                       </div>
                     </div>
