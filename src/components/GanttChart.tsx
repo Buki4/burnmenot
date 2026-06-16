@@ -170,10 +170,15 @@ function DraggableTrackRow({ track, minDate, maxDate, totalDays, months, onEditT
   if (validStages.length === 0) return null;
 
   return (
-    <div className="flex group h-12">
-      <div className="w-48 shrink-0 pr-4 flex items-center gap-2">
+    <div className="flex h-12 relative group/item">
+      <div className="w-48 shrink-0 pr-4 flex items-center gap-2 sticky left-0 bg-[#0f172a] z-20 shadow-[4px_0_12px_rgba(0,0,0,0.5)] group-hover/item:bg-slate-800 transition-colors pl-2">
+        <div className="cursor-grab active:cursor-grabbing text-slate-600 hover:text-slate-400 p-1 flex items-center opacity-0 group-hover/item:opacity-100 transition-opacity">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+          </svg>
+        </div>
         <h3 
-          className="text-slate-200 font-medium truncate group-hover:text-emerald-400 transition-colors cursor-pointer flex-1"
+          className="text-slate-200 font-medium truncate hover:text-emerald-400 transition-colors cursor-pointer flex-1"
           onClick={() => onEditTrack && onEditTrack(track)}
           title="Редактировать трек"
         >
@@ -181,7 +186,7 @@ function DraggableTrackRow({ track, minDate, maxDate, totalDays, months, onEditT
         </h3>
         <button 
           onClick={() => onEditTrack && onEditTrack(track)}
-          className="text-slate-500 hover:text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="text-slate-500 hover:text-emerald-400 opacity-0 group-hover/item:opacity-100 transition-opacity"
           title="Редактировать"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -215,19 +220,21 @@ function DraggableTrackRow({ track, minDate, maxDate, totalDays, months, onEditT
           return (
             <div 
               key={stage.id || stage.name}
-              className={`relative row-start-1 h-9 my-auto rounded-md border flex items-center justify-center text-xs font-medium whitespace-nowrap overflow-visible transition-colors cursor-grab active:cursor-grabbing shadow-lg ${colorClasses} ${isDraggingThis ? 'z-20 scale-[1.02] bg-opacity-40' : 'hover:scale-[1.02] hover:z-10'}`}
-              style={{ gridColumn: stage.span, userSelect: 'none' }}
+              className={`relative row-start-1 h-9 my-auto rounded-md border flex items-center justify-center text-xs font-medium whitespace-nowrap overflow-visible transition-colors shadow-lg ${colorClasses} ${isDraggingThis ? 'z-20 scale-[1.02] bg-opacity-40' : 'hover:scale-[1.02] hover:z-10'}`}
+              style={{ gridColumn: stage.span, userSelect: 'none', touchAction: 'pan-y' }}
               title={`${stage.name}: ${new Date(stage.startDate).toLocaleDateString('ru-RU')} - ${new Date(stage.endDate).toLocaleDateString('ru-RU')}`}
               onPointerDown={(e) => handlePointerDown(e, idx, 'body')}
             >
               <div 
                 className="absolute left-0 top-0 bottom-0 w-3 cursor-col-resize hover:bg-white/20 z-10 rounded-l-md"
                 onPointerDown={(e) => handlePointerDown(e, idx, 'left')}
+                style={{ touchAction: 'none' }}
               />
               <span className="px-3 truncate pointer-events-none">{stage.name}</span>
               <div 
                 className="absolute right-0 top-0 bottom-0 w-3 cursor-col-resize hover:bg-white/20 z-10 rounded-r-md"
                 onPointerDown={(e) => handlePointerDown(e, idx, 'right')}
+                style={{ touchAction: 'none' }}
               />
             </div>
           );
@@ -238,6 +245,62 @@ function DraggableTrackRow({ track, minDate, maxDate, totalDays, months, onEditT
 }
 
 export function GanttChart({ tracks, onEditTrack }: { tracks: any[], onEditTrack?: (track: any) => void }) {
+  const [orderedTracks, setOrderedTracks] = useState(tracks);
+  const dragItem = useRef<number | null>(null);
+  const dragOverItem = useRef<number | null>(null);
+  const { mutate } = useSWRConfig();
+
+  useEffect(() => {
+    setOrderedTracks(tracks);
+  }, [tracks]);
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    dragItem.current = index;
+    // Optional: make it look slightly transparent while dragging
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = 'move';
+    }
+  };
+
+  const handleDragEnter = (e: React.DragEvent, index: number) => {
+    dragOverItem.current = index;
+    if (dragItem.current !== null && dragItem.current !== index) {
+      const newList = [...orderedTracks];
+      const item = newList[dragItem.current];
+      newList.splice(dragItem.current, 1);
+      newList.splice(index, 0, item);
+      dragItem.current = index;
+      setOrderedTracks(newList);
+    }
+  };
+
+  const handleDragEnd = async () => {
+    dragItem.current = null;
+    dragOverItem.current = null;
+    
+    // Check if order actually changed by comparing IDs
+    const currentOrder = orderedTracks.map(t => t.id).join(',');
+    const initialOrder = tracks.map(t => t.id).join(',');
+    
+    if (currentOrder !== initialOrder) {
+      const payload = orderedTracks.map((t, idx) => ({ id: t.id, order: idx }));
+      
+      const savePromise = fetch('/api/tracks/reorder', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tracks: payload })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to reorder');
+        mutate('/api/tracks');
+      });
+
+      toast.promise(savePromise, {
+        loading: 'Сохранение порядка...',
+        success: 'Порядок треков сохранен!',
+        error: 'Ошибка при сохранении'
+      });
+    }
+  };
   const { minDate, maxDate } = useMemo(() => {
     let min = new Date().getTime() - 15 * DAY_MS;
     let max = new Date().getTime() + 45 * DAY_MS;
@@ -280,7 +343,7 @@ export function GanttChart({ tracks, onEditTrack }: { tracks: any[], onEditTrack
   const hasTracksWithDates = tracks.some(t => t.stages && t.stages.length > 0 && t.stages[0].startDate);
 
   return (
-    <div className="overflow-x-auto pb-8 rounded-xl bg-slate-900/50 border border-slate-800 p-6 shadow-xl custom-scrollbar" style={{ touchAction: 'none' }}>
+    <div className="overflow-x-auto pb-8 rounded-xl bg-slate-900/50 border border-slate-800 p-6 shadow-xl custom-scrollbar relative">
       <div className="min-w-[800px]">
         {/* Timeline Header */}
         <div className="flex ml-48 border-b border-slate-800">
@@ -292,17 +355,26 @@ export function GanttChart({ tracks, onEditTrack }: { tracks: any[], onEditTrack
         </div>
 
         {/* Tracks Grid */}
-        <div className="mt-4 space-y-4">
-          {tracks.map(track => (
-            <DraggableTrackRow 
-              key={track.id} 
-              track={track} 
-              minDate={minDate} 
-              maxDate={maxDate} 
-              totalDays={totalDays} 
-              months={months} 
-              onEditTrack={onEditTrack}
-            />
+        <div className="mt-4 space-y-4 relative">
+          {orderedTracks.map((track, index) => (
+            <div
+              key={track.id}
+              draggable
+              onDragStart={(e) => handleDragStart(e, index)}
+              onDragEnter={(e) => handleDragEnter(e, index)}
+              onDragEnd={handleDragEnd}
+              onDragOver={(e) => e.preventDefault()}
+              className="group/row"
+            >
+              <DraggableTrackRow 
+                track={track} 
+                minDate={minDate} 
+                maxDate={maxDate} 
+                totalDays={totalDays} 
+                months={months} 
+                onEditTrack={onEditTrack}
+              />
+            </div>
           ))}
           
           {!hasTracksWithDates && (

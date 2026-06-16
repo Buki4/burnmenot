@@ -6,7 +6,10 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   const tracks = await prisma.track.findMany({
     include: { tasks: { include: { assignee: true } }, files: true, stages: { orderBy: { order: 'asc' } } },
-    orderBy: { createdAt: 'desc' }
+    orderBy: [
+      { order: 'asc' },
+      { createdAt: 'asc' }
+    ]
   });
   return NextResponse.json(tracks);
 }
