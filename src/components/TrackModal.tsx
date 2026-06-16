@@ -9,14 +9,27 @@ export function TrackModal({ trackToEdit, onClose }: { trackToEdit?: any, onClos
   const [name, setName] = useState(trackToEdit?.name || '');
   const [status, setStatus] = useState(trackToEdit?.status || 'Препродакшн');
   
-  const defaultStages = [
-    { name: 'Препродакшн', color: 'blue', startDate: '', endDate: '', order: 0 },
-    { name: 'Запись', color: 'red', startDate: '', endDate: '', order: 1 },
-    { name: 'Эдитинг', color: 'orange', startDate: '', endDate: '', order: 2 },
-    { name: 'Сведение', color: 'purple', startDate: '', endDate: '', order: 3 },
-    { name: 'Мастеринг', color: 'pink', startDate: '', endDate: '', order: 4 },
-    { name: 'Релиз', color: 'emerald', startDate: '', endDate: '', order: 5 },
-  ];
+  const defaultStages = (() => {
+    const today = new Date();
+    const stages = [
+      { name: 'Препродакшн', color: 'blue', order: 0 },
+      { name: 'Запись', color: 'red', order: 1 },
+      { name: 'Эдитинг', color: 'orange', order: 2 },
+      { name: 'Сведение', color: 'purple', order: 3 },
+      { name: 'Мастеринг', color: 'pink', order: 4 },
+      { name: 'Релиз', color: 'emerald', order: 5 },
+    ];
+    
+    return stages.map((s, i) => {
+      const start = new Date(today.getTime() + (i * 21) * 24 * 60 * 60 * 1000);
+      const end = new Date(today.getTime() + ((i + 1) * 21) * 24 * 60 * 60 * 1000);
+      return {
+        ...s,
+        startDate: start.toISOString().split('T')[0],
+        endDate: end.toISOString().split('T')[0]
+      };
+    });
+  })();
 
   const initialStages = trackToEdit?.stages 
     ? trackToEdit.stages.map((s: any) => ({

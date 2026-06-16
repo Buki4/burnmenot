@@ -1,8 +1,211 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
+import { useSWRConfig } from 'swr';
+import toast from 'react-hot-toast';
 
 const DAY_MS = 1000 * 60 * 60 * 24;
+
+const addDays = (dateStr: string, days: number) => {
+  const d = new Date(dateStr);
+  const time = d.getTime() + days * DAY_MS;
+  return new Date(time).toISOString().split('T')[0];
+};
+
+function DraggableTrackRow({ track, minDate, maxDate, totalDays, months }: any) {
+  const [stages, setStages] = useState(track.stages || []);
+  const rowRef = useRef<HTMLDivElement>(null);
+  const { mutate } = useSWRConfig();
+  
+  const [dragInfo, setDragInfo] = useState<any>(null);
+  const [deltaDays, setDeltaDays] = useState(0);
+
+  useEffect(() => {
+    if (!dragInfo) setStages(track.stages || []);
+  }, [track.stages, dragInfo]);
+
+  const displayStages = useMemo(() => {
+    if (!dragInfo || deltaDays === 0) return stages;
+    
+    const newStages = JSON.parse(JSON.stringify(dragInfo.initialStages));
+    const idx = dragInfo.index;
+    
+    if (dragInfo.type === 'right') {
+      newStages[idx].endDate = addDays(newStages[idx].endDate, deltaDays);
+      for (let k = idx + 1; k < newStages.length; k++) {
+        newStages[k].startDate = addDays(newStages[k].startDate, deltaDays);
+        newStages[k].endDate = addDays(newStages[k].endDate, deltaDays);
+      }
+    } else if (dragInfo.type === 'left') {
+      newStages[idx].startDate = addDays(newStages[idx].startDate, deltaDays);
+      if (idx > 0) {
+        newStages[idx - 1].endDate = addDays(newStages[idx - 1].endDate, deltaDays);
+      }
+    } else if (dragInfo.type === 'body') {
+      if (idx > 0) {
+        newStages[idx - 1].endDate = addDays(newStages[idx - 1].endDate, deltaDays);
+      }
+      for (let k = idx; k < newStages.length; k++) {
+        newStages[k].startDate = addDays(newStages[k].startDate, deltaDays);
+        newStages[k].endDate = addDays(newStages[k].endDate, deltaDays);
+      }
+    }
+
+    for (const s of newStages) {
+      if (new Date(s.startDate).getTime() > new Date(s.endDate).getTime()) {
+        return dragInfo.lastValidStages || dragInfo.initialStages; 
+      }
+    }
+    
+    dragInfo.lastValidStages = newStages;
+    return newStages;
+  }, [stages, dragInfo, deltaDays]);
+
+  const displayStagesRef = useRef(displayStages);
+  useEffect(() => {
+    displayStagesRef.current = displayStages;
+  }, [displayStages]);
+
+  const handlePointerDown = (e: React.PointerEvent, index: number, type: 'left' | 'right' | 'body') => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!rowRef.current) return;
+    const rect = rowRef.current.getBoundingClientRect();
+    const pixelsPerDay = rect.width / totalDays;
+    
+    setDragInfo({
+      index,
+      type,
+      startX: e.clientX,
+      pixelsPerDay,
+      initialStages: JSON.parse(JSON.stringify(stages)),
+      lastValidStages: JSON.parse(JSON.stringify(stages))
+    });
+  };
+
+  useEffect(() => {
+    if (!dragInfo) return;
+
+    const handlePointerMove = (e: PointerEvent) => {
+      const deltaX = e.clientX - dragInfo.startX;
+      const days = Math.round(deltaX / dragInfo.pixelsPerDay);
+      setDeltaDays(days);
+    };
+
+    const handlePointerUp = async () => {
+      const finalStages = displayStagesRef.current;
+      const initial = dragInfo.initialStages;
+      
+      setDragInfo(null);
+      setDeltaDays(0);
+      setStages(finalStages);
+
+      // Only save if something changed
+      if (JSON.stringify(finalStages) === JSON.stringify(initial)) return;
+
+      try {
+        await fetch(`/api/tracks/${track.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: track.name,
+            status: track.status,
+            stages: finalStages.map((s: any, i: number) => ({
+              name: s.name,
+              color: s.color,
+              startDate: s.startDate,
+              endDate: s.endDate,
+              order: i
+            }))
+          })
+        });
+        mutate('/api/tracks');
+        toast.success('Сроки обновлены');
+      } catch (err) {
+        console.error(err);
+        toast.error('Ошибка сохранения');
+      }
+    };
+
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+    };
+  }, [dragInfo, track.id, track.name, track.status, mutate]);
+
+  const getColSpan = (start: string | null, end: string | null) => {
+    if (!start || !end) return null;
+    const s = new Date(start).getTime();
+    const e = new Date(end).getTime();
+    if (s > maxDate.getTime() || e < minDate.getTime()) return null;
+
+    let startCol = Math.floor((s - minDate.getTime()) / DAY_MS) + 1;
+    let endCol = Math.ceil((e - minDate.getTime()) / DAY_MS) + 2; 
+
+    startCol = Math.max(1, startCol);
+    endCol = Math.min(totalDays + 1, endCol);
+
+    if (startCol >= endCol) return null;
+    return `${startCol} / ${endCol}`;
+  };
+
+  const validStages = displayStages.map((s: any) => ({ ...s, span: getColSpan(s.startDate, s.endDate) })).filter((s: any) => s.span);
+  if (validStages.length === 0) return null;
+
+  return (
+    <div className="flex group h-12">
+      <div className="w-48 shrink-0 pr-4 flex items-center">
+        <h3 className="text-slate-200 font-medium truncate group-hover:text-emerald-400 transition-colors">{track.name}</h3>
+      </div>
+      <div 
+        ref={rowRef}
+        className="flex-1 relative bg-slate-800/30 rounded-lg border border-slate-800/50 overflow-hidden" 
+        style={{ display: 'grid', gridTemplateColumns: `repeat(${totalDays}, minmax(0, 1fr))` }}
+      >
+        <div className="col-start-1 col-end-[-1] row-start-1 flex h-full pointer-events-none">
+           {months.map((m: any, i: number) => (
+             <div key={i} className="border-r border-slate-800/30 h-full" style={{ width: `${(m.span / totalDays) * 100}%` }} />
+           ))}
+        </div>
+
+        {validStages.map((stage: any, idx: number) => {
+          const colorMap: Record<string, string> = {
+            blue: 'bg-blue-500/20 border-blue-500/50 text-blue-300 hover:bg-blue-500/30 shadow-blue-500/10',
+            red: 'bg-red-500/20 border-red-500/50 text-red-300 hover:bg-red-500/30 shadow-red-500/10',
+            orange: 'bg-orange-500/20 border-orange-500/50 text-orange-300 hover:bg-orange-500/30 shadow-orange-500/10',
+            purple: 'bg-purple-500/20 border-purple-500/50 text-purple-300 hover:bg-purple-500/30 shadow-purple-500/10',
+            pink: 'bg-pink-500/20 border-pink-500/50 text-pink-300 hover:bg-pink-500/30 shadow-pink-500/10',
+            emerald: 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/30 shadow-emerald-500/10',
+          };
+          const colorClasses = colorMap[stage.color] || colorMap['emerald'];
+          const isDraggingThis = dragInfo?.index === idx;
+
+          return (
+            <div 
+              key={stage.id || stage.name}
+              className={`absolute top-1.5 bottom-1.5 rounded-md border flex items-center justify-center text-xs font-medium whitespace-nowrap overflow-visible transition-colors cursor-grab active:cursor-grabbing shadow-lg ${colorClasses} ${isDraggingThis ? 'z-20 scale-[1.02] bg-opacity-40' : 'hover:scale-[1.02] hover:z-10'}`}
+              style={{ gridColumn: stage.span, userSelect: 'none' }}
+              title={`${stage.name}: ${new Date(stage.startDate).toLocaleDateString('ru-RU')} - ${new Date(stage.endDate).toLocaleDateString('ru-RU')}`}
+              onPointerDown={(e) => handlePointerDown(e, idx, 'body')}
+            >
+              <div 
+                className="absolute left-0 top-0 bottom-0 w-3 cursor-col-resize hover:bg-white/20 z-10 rounded-l-md"
+                onPointerDown={(e) => handlePointerDown(e, idx, 'left')}
+              />
+              <span className="px-3 truncate pointer-events-none">{stage.name}</span>
+              <div 
+                className="absolute right-0 top-0 bottom-0 w-3 cursor-col-resize hover:bg-white/20 z-10 rounded-r-md"
+                onPointerDown={(e) => handlePointerDown(e, idx, 'right')}
+              />
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export function GanttChart({ tracks }: { tracks: any[] }) {
   const { minDate, maxDate } = useMemo(() => {
@@ -31,22 +234,6 @@ export function GanttChart({ tracks }: { tracks: any[] }) {
 
   const totalDays = Math.ceil((maxDate.getTime() - minDate.getTime()) / DAY_MS);
 
-  const getColSpan = (start: string | null, end: string | null) => {
-    if (!start || !end) return null;
-    const s = new Date(start).getTime();
-    const e = new Date(end).getTime();
-    if (s > maxDate.getTime() || e < minDate.getTime()) return null;
-
-    let startCol = Math.floor((s - minDate.getTime()) / DAY_MS) + 1;
-    let endCol = Math.ceil((e - minDate.getTime()) / DAY_MS) + 2; 
-
-    startCol = Math.max(1, startCol);
-    endCol = Math.min(totalDays + 1, endCol);
-
-    if (startCol >= endCol) return null;
-    return `${startCol} / ${endCol}`;
-  };
-
   const days = Array.from({ length: totalDays }, (_, i) => new Date(minDate.getTime() + i * DAY_MS));
   
   const months: { label: string, span: number }[] = [];
@@ -60,12 +247,10 @@ export function GanttChart({ tracks }: { tracks: any[] }) {
     }
   });
 
-  const hasTracksWithDates = tracks.some(t => 
-    t.stages && t.stages.some((s: any) => getColSpan(s.startDate, s.endDate))
-  );
+  const hasTracksWithDates = tracks.some(t => t.stages && t.stages.length > 0 && t.stages[0].startDate);
 
   return (
-    <div className="overflow-x-auto pb-8 rounded-xl bg-slate-900/50 border border-slate-800 p-6 shadow-xl custom-scrollbar">
+    <div className="overflow-x-auto pb-8 rounded-xl bg-slate-900/50 border border-slate-800 p-6 shadow-xl custom-scrollbar" style={{ touchAction: 'none' }}>
       <div className="min-w-[800px]">
         {/* Timeline Header */}
         <div className="flex ml-48 border-b border-slate-800">
@@ -78,59 +263,16 @@ export function GanttChart({ tracks }: { tracks: any[] }) {
 
         {/* Tracks Grid */}
         <div className="mt-4 space-y-4">
-          {tracks.map(track => {
-            const validStages = track.stages 
-              ? track.stages.map((s: any) => ({ ...s, span: getColSpan(s.startDate, s.endDate) })).filter((s: any) => s.span)
-              : [];
-
-            if (validStages.length === 0) return null;
-
-            return (
-              <div key={track.id} className="flex group h-12">
-                <div className="w-48 shrink-0 pr-4 flex items-center">
-                  <h3 className="text-slate-200 font-medium truncate group-hover:text-emerald-400 transition-colors">{track.name}</h3>
-                </div>
-                <div 
-                  className="flex-1 relative bg-slate-800/30 rounded-lg border border-slate-800/50 overflow-hidden" 
-                  style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: `repeat(${totalDays}, minmax(0, 1fr))` 
-                  }}
-                >
-                  {/* Background grid lines */}
-                  <div className="col-start-1 col-end-[-1] row-start-1 flex h-full pointer-events-none">
-                     {months.map((m, i) => (
-                       <div key={i} className="border-r border-slate-800/30 h-full" style={{ width: `${(m.span / totalDays) * 100}%` }} />
-                     ))}
-                  </div>
-
-                  {/* Stage bars */}
-                  {validStages.map((stage: any) => {
-                    const colorMap: Record<string, string> = {
-                      blue: 'bg-blue-500/20 border-blue-500/50 text-blue-300 hover:bg-blue-500/30 shadow-blue-500/10',
-                      red: 'bg-red-500/20 border-red-500/50 text-red-300 hover:bg-red-500/30 shadow-red-500/10',
-                      orange: 'bg-orange-500/20 border-orange-500/50 text-orange-300 hover:bg-orange-500/30 shadow-orange-500/10',
-                      purple: 'bg-purple-500/20 border-purple-500/50 text-purple-300 hover:bg-purple-500/30 shadow-purple-500/10',
-                      pink: 'bg-pink-500/20 border-pink-500/50 text-pink-300 hover:bg-pink-500/30 shadow-pink-500/10',
-                      emerald: 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/30 shadow-emerald-500/10',
-                    };
-                    const colorClasses = colorMap[stage.color] || colorMap['emerald'];
-
-                    return (
-                      <div 
-                        key={stage.id || stage.name}
-                        className={`absolute top-1.5 bottom-1.5 rounded-md border flex items-center justify-center text-xs font-medium whitespace-nowrap overflow-hidden hover:scale-[1.02] hover:z-10 transition-all cursor-pointer shadow-lg ${colorClasses}`}
-                        style={{ gridColumn: stage.span }}
-                        title={`${stage.name}: ${new Date(stage.startDate).toLocaleDateString('ru-RU')} - ${new Date(stage.endDate).toLocaleDateString('ru-RU')}`}
-                      >
-                        <span className="px-2 truncate">{stage.name}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
+          {tracks.map(track => (
+            <DraggableTrackRow 
+              key={track.id} 
+              track={track} 
+              minDate={minDate} 
+              maxDate={maxDate} 
+              totalDays={totalDays} 
+              months={months} 
+            />
+          ))}
           
           {!hasTracksWithDates && (
             <div className="py-12 flex flex-col items-center justify-center text-slate-500">
