@@ -19,6 +19,7 @@ export function Sidebar() {
         <TransitionLink href="/timeline" className={`whitespace-nowrap px-3 md:px-4 py-2 rounded-lg transition-all duration-200 ${pathname === '/timeline' ? 'bg-orange-500/10 text-orange-400 font-medium' : 'hover:bg-slate-800 hover:text-white text-slate-300'}`}>Таймлайн (Гант)</TransitionLink>
         <TransitionLink href="/calendar" className={`whitespace-nowrap px-3 md:px-4 py-2 rounded-lg transition-all duration-200 ${pathname === '/calendar' ? 'bg-orange-500/10 text-orange-400 font-medium' : 'hover:bg-slate-800 hover:text-white text-slate-300'}`}>Календарь</TransitionLink>
         <TransitionLink href="/storage" className={`whitespace-nowrap px-3 md:px-4 py-2 rounded-lg transition-all duration-200 ${pathname === '/storage' ? 'bg-orange-500/10 text-orange-400 font-medium' : 'hover:bg-slate-800 hover:text-white text-slate-300'}`}>Хранилище</TransitionLink>
+        <TransitionLink href="/notes" className={`whitespace-nowrap px-3 md:px-4 py-2 rounded-lg transition-all duration-200 ${pathname === '/notes' ? 'bg-orange-500/10 text-orange-400 font-medium' : 'hover:bg-slate-800 hover:text-white text-slate-300'}`}>Заметки</TransitionLink>
       </nav>
       <div className="hidden md:block mt-auto pt-6 border-t border-slate-800">
         {/* Floating Voice Recorder placeholder or user info */}

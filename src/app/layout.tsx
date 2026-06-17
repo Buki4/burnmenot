@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/Sidebar";
-import { VoiceRecorder } from "@/components/VoiceRecorder";
+import { DictationFab } from "@/components/DictationFab";
 import { Toaster } from 'react-hot-toast';
 import NextTopLoader from 'nextjs-toploader';
 import { TransitionProvider } from '@/components/TransitionContext';
@@ -42,7 +42,7 @@ export default function RootLayout({
           <main className="flex-1 p-4 md:p-8 overflow-y-auto">
           {children}
         </main>
-        <VoiceRecorder />
+        <DictationFab />
         </TransitionProvider>
       </body>
     </html>
