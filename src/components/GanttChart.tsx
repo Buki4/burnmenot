@@ -330,6 +330,16 @@ export function GanttChart({ tracks, onEditTrack }: { tracks: any[], onEditTrack
 
   const totalDays = Math.ceil((maxDate.getTime() - minDate.getTime()) / DAY_MS);
 
+  const todayTime = new Date().setHours(0, 0, 0, 0);
+  const minT = minDate.getTime();
+  const maxT = maxDate.getTime();
+  
+  let todayOffsetPct = null;
+  if (todayTime >= minT && todayTime <= maxT) {
+    // Add 0.5 so the line runs through the middle of the "today" column
+    todayOffsetPct = ((todayTime - minT) / DAY_MS + 0.5) / totalDays * 100;
+  }
+
   const days = Array.from({ length: totalDays }, (_, i) => new Date(minDate.getTime() + i * DAY_MS));
   
   const months: { label: string, span: number }[] = [];
@@ -347,9 +357,22 @@ export function GanttChart({ tracks, onEditTrack }: { tracks: any[], onEditTrack
 
   return (
     <div className="overflow-x-auto pb-8 rounded-xl bg-slate-900/50 border border-slate-800 p-6 shadow-xl custom-scrollbar relative">
-      <div className="min-w-[800px]">
+      <div className="min-w-[800px] relative">
+        {todayOffsetPct !== null && (
+          <div className="absolute top-0 bottom-0 left-48 right-0 pointer-events-none z-30">
+            <div 
+              className="absolute top-0 bottom-0 border-l-2 border-dashed border-orange-500/60"
+              style={{ left: `${todayOffsetPct}%` }}
+            >
+              <div className="absolute top-0 -translate-x-1/2 -translate-y-2 bg-orange-500 text-white text-[10px] px-2 py-0.5 rounded-full font-medium shadow-lg shadow-orange-500/20 whitespace-nowrap">
+                Сегодня
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Timeline Header */}
-        <div className="flex ml-48 border-b border-slate-800">
+        <div className="flex ml-48 border-b border-slate-800 pt-2">
           {months.map((m, i) => (
             <div key={i} className="text-center text-sm font-semibold text-slate-400 py-2 border-r border-slate-800/50" style={{ width: `${(m.span / totalDays) * 100}%` }}>
               {m.label.charAt(0).toUpperCase() + m.label.slice(1)}
