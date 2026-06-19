@@ -20,6 +20,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "BurnMeNotApp",
   description: "Collaborative app for music bands",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "BurnMeNot",
+  },
 };
 
 export default function RootLayout({
