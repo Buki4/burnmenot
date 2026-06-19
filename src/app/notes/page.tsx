@@ -1,11 +1,31 @@
 'use client';
 
-import useSWR from 'swr';
+import useSWR, { useSWRConfig } from 'swr';
+import toast from 'react-hot-toast';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 export default function NotesPage() {
   const { data: notes, error, isLoading } = useSWR('/api/notes', fetcher);
+  const { mutate } = useSWRConfig();
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Удалить заметку?')) return;
+    
+    // Optimistic update
+    const previousNotes = notes;
+    mutate('/api/notes', notes.filter((n: any) => n.id !== id), false);
+    
+    try {
+      const res = await fetch(`/api/notes/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete');
+      toast.success('Заметка удалена');
+      mutate('/api/notes');
+    } catch (err) {
+      toast.error('Ошибка при удалении');
+      mutate('/api/notes', previousNotes);
+    }
+  };
 
   if (error) return <div className="p-8 text-red-500">Failed to load notes</div>;
 
@@ -33,10 +53,21 @@ export default function NotesPage() {
           )}
 
           {notes?.map((note: any) => (
-            <div key={note.id} className="bg-slate-900/50 border border-slate-800 rounded-xl p-5 shadow-lg hover:border-indigo-500/50 transition-colors flex flex-col">
+            <div key={note.id} className="bg-slate-900/50 border border-slate-800 rounded-xl p-5 shadow-lg hover:border-indigo-500/50 transition-colors flex flex-col group">
               <div className="text-xs text-slate-500 mb-3 flex items-center justify-between">
-                <span>{new Date(note.createdAt).toLocaleDateString('ru-RU')}</span>
-                <span>{new Date(note.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</span>
+                <div>
+                  <span>{new Date(note.createdAt).toLocaleDateString('ru-RU')}</span>
+                  <span className="ml-2">{new Date(note.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+                <button 
+                  onClick={() => handleDelete(note.id)}
+                  className="text-slate-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                  title="Удалить"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
               </div>
               <p className="text-slate-300 text-sm whitespace-pre-wrap flex-1">{note.content}</p>
             </div>
