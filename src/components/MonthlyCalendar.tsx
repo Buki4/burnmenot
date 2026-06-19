@@ -153,11 +153,11 @@ export function MonthlyCalendar({ events }: { events: any[] }) {
                     <div 
                       key={event.id}
                       onClick={(e) => handleEventClick(e, event)}
-                      className={`text-xs px-1.5 md:px-2 py-1 rounded-md border flex items-center gap-1.5 truncate cursor-pointer hover:brightness-110 transition-all ${getEventColor(event.type)}`}
+                      className={`text-xs px-1.5 md:px-2 py-1 rounded-md border flex items-start gap-1.5 cursor-pointer hover:brightness-110 transition-all ${getEventColor(event.type)}`}
                       title={`${eventTime} - ${event.title}`}
                     >
-                      <span className="text-[10px] opacity-75 shrink-0 hidden md:inline">{eventTime}</span>
-                      <span className="truncate font-medium">{event.title}</span>
+                      <span className="text-[10px] opacity-75 shrink-0 hidden md:inline mt-0.5">{eventTime}</span>
+                      <span className="font-medium whitespace-normal break-words leading-tight">{event.title}</span>
                     </div>
                   );
                 })}
