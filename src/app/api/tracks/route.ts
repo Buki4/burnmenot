@@ -24,10 +24,8 @@ export async function POST(req: Request) {
       stagesData = [
         { name: 'Препродакшн', color: 'blue', order: 0 },
         { name: 'Запись', color: 'red', order: 1 },
-        { name: 'Эдитинг', color: 'orange', order: 2 },
-        { name: 'Сведение', color: 'purple', order: 3 },
-        { name: 'Мастеринг', color: 'pink', order: 4 },
-        { name: 'Релиз', color: 'emerald', order: 5 },
+        { name: 'Сведение', color: 'purple', order: 2 },
+        { name: 'Релиз', color: 'emerald', order: 3 },
       ].map((s, i) => {
         const start = new Date(today.getTime() + (i * 21) * 24 * 60 * 60 * 1000);
         const end = new Date(today.getTime() + ((i + 1) * 21) * 24 * 60 * 60 * 1000);

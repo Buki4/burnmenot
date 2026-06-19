@@ -1,21 +1,22 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/Sidebar";
 import { DictationFab } from "@/components/DictationFab";
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from "react-hot-toast";
 import NextTopLoader from 'nextjs-toploader';
 import { TransitionProvider } from '@/components/TransitionContext';
+import { DragDropProvider } from "@/components/DragDropProvider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ["latin", "cyrillic"] });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+export const viewport: Viewport = {
+  themeColor: '#020617',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
 
 export const metadata: Metadata = {
   title: "BurnMeNotApp",
@@ -34,22 +35,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col md:flex-row text-slate-100 bg-slate-950">
-        <TransitionProvider>
-          <NextTopLoader color="#f97316" showSpinner={false} />
-          <Sidebar />
-          <Toaster position="bottom-right" toastOptions={{
-            style: { background: '#1e293b', color: '#fff', border: '1px solid #334155' }
-          }} />
-          <main className="flex-1 p-4 md:p-8 overflow-y-auto">
-          {children}
-        </main>
-        <DictationFab />
-        </TransitionProvider>
+    <html lang="ru">
+      <body className={`${inter.className} bg-[#020617] text-slate-200 min-h-screen flex flex-col md:flex-row antialiased selection:bg-orange-500/30`}>
+        <DragDropProvider>
+          <TransitionProvider>
+            <NextTopLoader color="#f97316" showSpinner={false} />
+            <Toaster position="top-right" toastOptions={{
+              style: {
+                background: '#1e293b',
+                color: '#f1f5f9',
+                border: '1px solid #334155'
+              }
+            }} />
+            <Sidebar />
+            <main className="flex-1 p-4 md:p-8 overflow-y-auto w-full md:w-auto h-[100dvh] pb-24 md:pb-8">
+              {children}
+              <DictationFab />
+            </main>
+          </TransitionProvider>
+        </DragDropProvider>
       </body>
     </html>
   );

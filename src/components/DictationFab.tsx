@@ -105,7 +105,7 @@ export function DictationFab() {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-indigo-500 hover:bg-indigo-600 rounded-full shadow-lg shadow-indigo-500/30 flex items-center justify-center text-white transition-transform hover:scale-110 z-50"
+        className="fixed bottom-24 md:bottom-6 right-6 w-14 h-14 bg-indigo-500 hover:bg-indigo-600 rounded-full shadow-lg shadow-indigo-500/30 flex items-center justify-center text-white transition-transform hover:scale-110 z-50"
         title="Новая голосовая заметка"
       >
         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -116,7 +116,7 @@ export function DictationFab() {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 w-80 bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl z-50 overflow-hidden flex flex-col">
+    <div className="fixed bottom-24 md:bottom-6 right-6 w-80 max-w-[calc(100vw-3rem)] bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl z-50 overflow-hidden flex flex-col">
       <div className="flex justify-between items-center p-4 border-b border-slate-700 bg-slate-800/50">
         <h3 className="font-semibold text-slate-200 flex items-center gap-2">
           <svg className="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
