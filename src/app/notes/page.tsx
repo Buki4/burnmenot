@@ -61,7 +61,7 @@ export default function NotesPage() {
                 </div>
                 <button 
                   onClick={() => handleDelete(note.id)}
-                  className="text-slate-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                  className="text-slate-500 hover:text-red-400 opacity-70 hover:opacity-100 transition-all p-1"
                   title="Удалить"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
