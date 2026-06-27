@@ -83,21 +83,21 @@ export function MonthlyCalendar({ events }: { events: any[] }) {
   return (
     <div className="flex flex-col h-full bg-slate-900 border border-slate-800 rounded-2xl shadow-xl overflow-hidden min-h-[600px]">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-900/50">
-        <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-bold text-slate-100 w-48">
+      <div className="flex items-center justify-between p-3 md:p-4 border-b border-slate-800 bg-slate-900/50 gap-2">
+        <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
+          <h2 className="text-lg md:text-2xl font-bold text-slate-100 truncate">
             {capitalizedMonth} <span className="text-slate-500 font-medium">{year}</span>
           </h2>
-          <button onClick={handleToday} className="px-3 py-1.5 text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors border border-slate-700">
+          <button onClick={handleToday} className="px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors border border-slate-700 whitespace-nowrap shrink-0">
             Сегодня
           </button>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={handlePrevMonth} className="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-slate-200 transition-colors border border-slate-700">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+        <div className="flex items-center gap-1 md:gap-2 shrink-0">
+          <button onClick={handlePrevMonth} className="p-1.5 md:p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-slate-200 transition-colors border border-slate-700">
+            <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           </button>
-          <button onClick={handleNextMonth} className="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-slate-200 transition-colors border border-slate-700">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+          <button onClick={handleNextMonth} className="p-1.5 md:p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-slate-200 transition-colors border border-slate-700">
+            <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
           </button>
         </div>
       </div>
