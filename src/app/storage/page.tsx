@@ -24,8 +24,8 @@ export default function StoragePage() {
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 h-full flex flex-col">
-      <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4 mb-4">
-        <h1 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-500">Хранилище</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-500">Хранилище</h1>
         <UploadModal tracks={tracks} />
       </div>
 

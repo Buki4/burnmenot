@@ -26,9 +26,12 @@ export default function TracksPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 h-full flex flex-col">
-      <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4 mb-4">
-        <h1 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-600">Задачи и Треки</h1>
-        <div className="flex flex-wrap gap-3 w-full md:w-auto">
+      <div className="flex justify-between items-center mb-4 md:mb-0">
+        <div>
+          <h1 className="text-2xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-rose-400">Задачи</h1>
+          <p className="hidden md:block text-slate-400 mt-2">Канбан-доска для управления процессами (Предпродакшн, Запись, Сведение, Релиз)</p>
+        </div>
+        <div className="flex gap-3">
           <TrackModal />
           <TaskModal tracks={tracks} />
         </div>

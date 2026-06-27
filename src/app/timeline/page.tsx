@@ -15,10 +15,10 @@ export default function TimelinePage() {
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4 mb-4">
+      <div className="flex justify-between items-center mb-4">
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">Таймлайн</h1>
-          <p className="text-slate-400 mt-2">Отслеживание цикла работы над треками (Диаграмма Ганта)</p>
+          <h1 className="text-2xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">Таймлайн</h1>
+          <p className="hidden md:block text-slate-400 mt-2">Отслеживание цикла работы над треками (Диаграмма Ганта)</p>
         </div>
         <TrackModal />
       </div>

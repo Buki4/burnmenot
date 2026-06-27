@@ -114,8 +114,8 @@ export function Sidebar() {
       </nav>
 
       {/* Mobile Top Header (Logo) */}
-      <div className="md:hidden flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-40 border-b border-slate-800">
-         <Image src="/logo.png" alt="BurnMeNot" width={120} height={40} className="object-contain" priority />
+      <div className="md:hidden flex items-center justify-center py-2 px-4 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-40 border-b border-slate-800">
+         <Image src="/logo.png" alt="BurnMeNot" width={100} height={28} className="object-contain" priority />
       </div>
     </>
   );

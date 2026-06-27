@@ -31,9 +31,9 @@ export default function NotesPage() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-500">Заметки</h1>
-        <p className="text-slate-400 mt-2">Ваши надиктованные идеи и мысли с репетиций</p>
+      <div className="mb-4 md:mb-8">
+        <h1 className="text-2xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-500">Заметки</h1>
+        <p className="hidden md:block text-slate-400 mt-2">Ваши надиктованные идеи и мысли с репетиций</p>
       </div>
 
       {isLoading ? (
