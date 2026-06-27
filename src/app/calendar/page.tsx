@@ -21,9 +21,9 @@ export default function CalendarPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 h-full flex flex-col max-w-7xl mx-auto">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-500">Календарь</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-500">Календарь</h1>
           <p className="text-slate-400 mt-2">Расписание репетиций, концертов и съемок</p>
         </div>
         <EventModal />

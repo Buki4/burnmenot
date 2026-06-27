@@ -48,7 +48,7 @@ export default function RootLayout({
               }
             }} />
             <Sidebar />
-            <main className="flex-1 p-4 md:p-8 overflow-y-auto w-full md:w-auto h-[100dvh] pb-24 md:pb-8">
+            <main className="flex-1 p-4 md:p-8 overflow-y-auto w-full md:w-auto h-[100dvh] pb-36 md:pb-8">
               {children}
               <DictationFab />
             </main>

@@ -35,7 +35,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <h1 className="text-4xl font-bold mb-8">Дашборд</h1>
+      <h1 className="text-3xl md:text-4xl font-bold mb-8">Дашборд</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         
