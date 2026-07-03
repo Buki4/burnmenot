@@ -12,7 +12,7 @@ const addDays = (dateStr: string, days: number) => {
   return new Date(time).toISOString().split('T')[0];
 };
 
-function DraggableTrackRow({ track, minDate, maxDate, totalDays, months, onEditTrack }: any) {
+function DraggableTrackRow({ track, minDate, maxDate, totalDays, months, onEditTrack, isEditMode }: any) {
   const [stages, setStages] = useState(track.stages || []);
   const rowRef = useRef<HTMLDivElement>(null);
   const { mutate } = useSWRConfig();
@@ -68,6 +68,7 @@ function DraggableTrackRow({ track, minDate, maxDate, totalDays, months, onEditT
   }, [displayStages]);
 
   const handlePointerDown = (e: React.PointerEvent, index: number, type: 'left' | 'right' | 'body') => {
+    if (!isEditMode) return;
     // DO NOT use e.preventDefault() here as it breaks pointermove on many browsers
     e.stopPropagation();
     if (!rowRef.current) return;
@@ -223,22 +224,26 @@ function DraggableTrackRow({ track, minDate, maxDate, totalDays, months, onEditT
           return (
             <div 
               key={stage.id || stage.name}
-              className={`relative row-start-1 h-9 my-auto rounded-md border flex items-center justify-center text-xs font-medium whitespace-nowrap overflow-visible transition-colors shadow-lg ${colorClasses} ${isDraggingThis ? 'z-20 scale-[1.02] bg-opacity-40' : 'hover:scale-[1.02] hover:z-10'}`}
+              className={`relative row-start-1 h-9 my-auto rounded-md border flex items-center justify-center text-xs font-medium whitespace-nowrap overflow-visible transition-colors shadow-lg ${colorClasses} ${isDraggingThis ? 'z-20 scale-[1.02] bg-opacity-40' : (isEditMode ? 'hover:scale-[1.02] hover:z-10' : '')}`}
               style={{ gridColumn: stage.span, userSelect: 'none', touchAction: 'pan-y' }}
               title={`${stage.name}: ${new Date(stage.startDate).toLocaleDateString('ru-RU')} - ${new Date(stage.endDate).toLocaleDateString('ru-RU')}`}
               onPointerDown={(e) => handlePointerDown(e, idx, 'body')}
             >
-              <div 
-                className="absolute left-0 top-0 bottom-0 w-3 cursor-col-resize hover:bg-white/20 z-10 rounded-l-md"
-                onPointerDown={(e) => handlePointerDown(e, idx, 'left')}
-                style={{ touchAction: 'none' }}
-              />
+              {isEditMode && (
+                <div 
+                  className="absolute left-0 top-0 bottom-0 w-3 cursor-col-resize hover:bg-white/20 z-10 rounded-l-md"
+                  onPointerDown={(e) => handlePointerDown(e, idx, 'left')}
+                  style={{ touchAction: 'none' }}
+                />
+              )}
               <span className="px-3 truncate pointer-events-none">{stage.name}</span>
-              <div 
-                className="absolute right-0 top-0 bottom-0 w-3 cursor-col-resize hover:bg-white/20 z-10 rounded-r-md"
-                onPointerDown={(e) => handlePointerDown(e, idx, 'right')}
-                style={{ touchAction: 'none' }}
-              />
+              {isEditMode && (
+                <div 
+                  className="absolute right-0 top-0 bottom-0 w-3 cursor-col-resize hover:bg-white/20 z-10 rounded-r-md"
+                  onPointerDown={(e) => handlePointerDown(e, idx, 'right')}
+                  style={{ touchAction: 'none' }}
+                />
+              )}
             </div>
           );
         })}
@@ -248,6 +253,7 @@ function DraggableTrackRow({ track, minDate, maxDate, totalDays, months, onEditT
 }
 
 export function GanttChart({ tracks, onEditTrack }: { tracks: any[], onEditTrack?: (track: any) => void }) {
+  const [isEditMode, setIsEditMode] = useState(false);
   const [orderedTracks, setOrderedTracks] = useState(tracks);
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
@@ -356,8 +362,17 @@ export function GanttChart({ tracks, onEditTrack }: { tracks: any[], onEditTrack
   const hasTracksWithDates = tracks.some(t => t.stages && t.stages.length > 0 && t.stages[0].startDate);
 
   return (
-    <div className="overflow-x-auto pb-8 rounded-xl bg-slate-900/50 border border-slate-800 p-6 shadow-xl custom-scrollbar relative">
-      <div className="min-w-[800px] relative">
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <button 
+          onClick={() => setIsEditMode(!isEditMode)}
+          className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors border shadow-sm ${isEditMode ? 'bg-indigo-500 text-white border-indigo-400 shadow-indigo-500/20' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200 hover:bg-slate-700'}`}
+        >
+          {isEditMode ? 'Готово (Блок)' : '✏️ Редактировать таймлайн'}
+        </button>
+      </div>
+      <div className="overflow-x-auto pb-8 rounded-xl bg-slate-900/50 border border-slate-800 p-6 shadow-xl custom-scrollbar relative">
+        <div className="min-w-[800px] relative">
         {todayOffsetPct !== null && (
           <div className="absolute top-0 bottom-0 left-20 md:left-48 right-0 pointer-events-none z-30">
             <div 
@@ -372,12 +387,15 @@ export function GanttChart({ tracks, onEditTrack }: { tracks: any[], onEditTrack
         )}
 
         {/* Timeline Header */}
-        <div className="flex ml-20 md:ml-48 border-b border-slate-800 pt-2">
-          {months.map((m, i) => (
-            <div key={i} className="text-center text-xs md:text-sm font-semibold text-slate-400 py-2 border-r border-slate-800/50 truncate px-1" style={{ width: `${(m.span / totalDays) * 100}%` }}>
-              {m.label.charAt(0).toUpperCase() + m.label.slice(1)}
-            </div>
-          ))}
+        <div className="flex border-b border-slate-800 pt-2">
+          <div className="w-20 md:w-48 shrink-0 sticky left-0 bg-slate-950 z-40 border-r border-slate-800/50"></div>
+          <div className="flex-1 flex">
+            {months.map((m, i) => (
+              <div key={i} className="text-center text-xs md:text-sm font-semibold text-slate-400 py-2 border-r border-slate-800/50 truncate px-1" style={{ width: `${(m.span / totalDays) * 100}%` }}>
+                {m.label.charAt(0).toUpperCase() + m.label.slice(1)}
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Tracks Grid */}
@@ -398,6 +416,7 @@ export function GanttChart({ tracks, onEditTrack }: { tracks: any[], onEditTrack
                 totalDays={totalDays} 
                 months={months} 
                 onEditTrack={onEditTrack}
+                isEditMode={isEditMode}
               />
             </div>
           ))}
@@ -411,6 +430,7 @@ export function GanttChart({ tracks, onEditTrack }: { tracks: any[], onEditTrack
               <p className="text-sm mt-1">Отредактируйте трек или создайте новый и укажите сроки стадий.</p>
             </div>
           )}
+        </div>
         </div>
       </div>
     </div>
