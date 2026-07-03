@@ -174,7 +174,7 @@ function DraggableTrackRow({ track, minDate, maxDate, totalDays, months, onEditT
     <div className="flex h-12 relative group/item">
       <div 
         draggable
-        className="w-20 md:w-48 shrink-0 md:pr-4 flex items-center gap-1 md:gap-2 sticky left-0 bg-slate-950 z-40 shadow-[4px_0_12px_rgba(0,0,0,0.8)] group-hover/item:bg-slate-900 transition-colors pl-1 md:pl-2"
+        className="w-[104px] md:w-[216px] shrink-0 md:pr-4 flex items-center gap-1 md:gap-2 sticky left-0 bg-slate-950 z-40 shadow-[4px_0_12px_rgba(0,0,0,0.8)] group-hover/item:bg-slate-900 transition-colors pl-7 md:pl-8"
       >
         <div className="hidden md:flex cursor-grab active:cursor-grabbing text-slate-600 hover:text-slate-400 p-1 items-center opacity-0 group-hover/item:opacity-100 transition-opacity">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -371,10 +371,10 @@ export function GanttChart({ tracks, onEditTrack }: { tracks: any[], onEditTrack
           {isEditMode ? 'Готово (Блок)' : '✏️ Редактировать таймлайн'}
         </button>
       </div>
-      <div className="overflow-x-auto pb-8 rounded-xl bg-slate-900/50 border border-slate-800 p-6 shadow-xl custom-scrollbar relative">
-        <div className="min-w-[800px] relative">
+      <div className="overflow-x-auto py-6 rounded-xl bg-slate-900/50 border border-slate-800 shadow-xl custom-scrollbar relative">
+        <div className="min-w-[800px] relative pr-6">
         {todayOffsetPct !== null && (
-          <div className="absolute top-0 bottom-0 left-20 md:left-48 right-0 pointer-events-none z-30">
+          <div className="absolute top-0 bottom-0 left-[104px] md:left-[216px] right-0 pointer-events-none z-30">
             <div 
               className="absolute top-0 bottom-0 border-l-2 border-dashed border-orange-500/60"
               style={{ left: `${todayOffsetPct}%` }}
@@ -388,7 +388,7 @@ export function GanttChart({ tracks, onEditTrack }: { tracks: any[], onEditTrack
 
         {/* Timeline Header */}
         <div className="flex border-b border-slate-800 pt-2">
-          <div className="w-20 md:w-48 shrink-0 sticky left-0 bg-slate-950 z-40 border-r border-slate-800/50"></div>
+          <div className="w-[104px] md:w-[216px] shrink-0 sticky left-0 bg-slate-950 z-40 border-r border-slate-800/50"></div>
           <div className="flex-1 flex">
             {months.map((m, i) => (
               <div key={i} className="text-center text-xs md:text-sm font-semibold text-slate-400 py-2 border-r border-slate-800/50 truncate px-1" style={{ width: `${(m.span / totalDays) * 100}%` }}>
