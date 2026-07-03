@@ -48,8 +48,10 @@ export default function RootLayout({
               }
             }} />
             <Sidebar />
-            <main className="flex-1 min-h-0 p-4 md:p-8 overflow-y-auto w-full md:w-auto pb-36 md:pb-8 relative">
-              {children}
+            <main className="flex-1 min-h-0 p-4 md:p-8 overflow-y-auto w-full md:w-auto relative">
+              <div className="pb-32 md:pb-8">
+                {children}
+              </div>
               <DictationFab />
             </main>
           </TransitionProvider>
