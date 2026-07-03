@@ -50,7 +50,14 @@ export default function Dashboard() {
                 <li key={task.id} className="bg-slate-800 p-3 rounded-lg flex justify-between items-center transition-all hover:bg-slate-750">
                   <div>
                     <p className="font-medium text-slate-200">{task.description}</p>
-                    <p className="text-xs text-slate-400">{task.track?.name || 'Общая задача'}</p>
+                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                      <p className="text-xs text-slate-400">{task.track?.name || 'Общая задача'}</p>
+                      {task.assignee && (
+                        <span className="text-[10px] px-2 py-0.5 rounded bg-slate-700/50 text-slate-300 border border-slate-600/50">
+                          👤 {task.assignee.name}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <span className={`px-2 py-1 text-xs rounded-full font-medium ${task.status === 'In Progress' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-slate-700 text-slate-300 border border-slate-600'}`}>
                     {task.status}
