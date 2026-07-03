@@ -173,7 +173,7 @@ function DraggableTrackRow({ track, minDate, maxDate, totalDays, months, onEditT
     <div className="flex h-12 relative group/item">
       <div 
         draggable
-        className="w-20 md:w-48 shrink-0 md:pr-4 flex items-center gap-1 md:gap-2 sticky left-0 bg-[#0f172a] z-20 shadow-[4px_0_12px_rgba(0,0,0,0.5)] group-hover/item:bg-slate-800 transition-colors pl-1 md:pl-2"
+        className="w-20 md:w-48 shrink-0 md:pr-4 flex items-center gap-1 md:gap-2 sticky left-0 bg-slate-950 z-40 shadow-[4px_0_12px_rgba(0,0,0,0.8)] group-hover/item:bg-slate-900 transition-colors pl-1 md:pl-2"
       >
         <div className="hidden md:flex cursor-grab active:cursor-grabbing text-slate-600 hover:text-slate-400 p-1 items-center opacity-0 group-hover/item:opacity-100 transition-opacity">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
