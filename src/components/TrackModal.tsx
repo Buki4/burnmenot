@@ -134,9 +134,10 @@ export function TrackModal({ trackToEdit, onClose }: { trackToEdit?: any, onClos
       {!trackToEdit && (
         <button 
           onClick={() => setIsOpen(true)}
-          className="bg-slate-800 hover:bg-slate-700 text-white px-6 py-2 rounded-full font-medium transition-colors border border-slate-700 shadow-lg shadow-slate-900/30 whitespace-nowrap w-full md:w-auto"
+          className="bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 md:px-6 md:py-2 text-sm md:text-base rounded-full font-medium transition-colors border border-slate-700 shadow-lg shadow-slate-900/30 whitespace-nowrap"
         >
-          + Новый Трек
+          <span className="md:hidden">+ Трек</span>
+          <span className="hidden md:inline">+ Новый Трек</span>
         </button>
       )}
 

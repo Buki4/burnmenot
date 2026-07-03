@@ -173,15 +173,15 @@ function DraggableTrackRow({ track, minDate, maxDate, totalDays, months, onEditT
     <div className="flex h-12 relative group/item">
       <div 
         draggable
-        className="w-48 shrink-0 pr-4 flex items-center gap-2 sticky left-0 bg-[#0f172a] z-20 shadow-[4px_0_12px_rgba(0,0,0,0.5)] group-hover/item:bg-slate-800 transition-colors pl-2"
+        className="w-20 md:w-48 shrink-0 md:pr-4 flex items-center gap-1 md:gap-2 sticky left-0 bg-[#0f172a] z-20 shadow-[4px_0_12px_rgba(0,0,0,0.5)] group-hover/item:bg-slate-800 transition-colors pl-1 md:pl-2"
       >
-        <div className="cursor-grab active:cursor-grabbing text-slate-600 hover:text-slate-400 p-1 flex items-center opacity-0 group-hover/item:opacity-100 transition-opacity">
+        <div className="hidden md:flex cursor-grab active:cursor-grabbing text-slate-600 hover:text-slate-400 p-1 items-center opacity-0 group-hover/item:opacity-100 transition-opacity">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
           </svg>
         </div>
         <h3 
-          className="text-slate-200 font-medium truncate hover:text-emerald-400 transition-colors cursor-pointer flex-1"
+          className="text-slate-200 text-xs md:text-base font-medium truncate hover:text-emerald-400 transition-colors cursor-pointer flex-1"
           onClick={() => onEditTrack && onEditTrack(track)}
           title="Редактировать трек"
         >
@@ -189,7 +189,7 @@ function DraggableTrackRow({ track, minDate, maxDate, totalDays, months, onEditT
         </h3>
         <button 
           onClick={() => onEditTrack && onEditTrack(track)}
-          className="text-slate-500 hover:text-emerald-400 opacity-0 group-hover/item:opacity-100 transition-opacity"
+          className="hidden md:block text-slate-500 hover:text-emerald-400 opacity-0 group-hover/item:opacity-100 transition-opacity"
           title="Редактировать"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -359,7 +359,7 @@ export function GanttChart({ tracks, onEditTrack }: { tracks: any[], onEditTrack
     <div className="overflow-x-auto pb-8 rounded-xl bg-slate-900/50 border border-slate-800 p-6 shadow-xl custom-scrollbar relative">
       <div className="min-w-[800px] relative">
         {todayOffsetPct !== null && (
-          <div className="absolute top-0 bottom-0 left-48 right-0 pointer-events-none z-30">
+          <div className="absolute top-0 bottom-0 left-20 md:left-48 right-0 pointer-events-none z-30">
             <div 
               className="absolute top-0 bottom-0 border-l-2 border-dashed border-orange-500/60"
               style={{ left: `${todayOffsetPct}%` }}
@@ -372,9 +372,9 @@ export function GanttChart({ tracks, onEditTrack }: { tracks: any[], onEditTrack
         )}
 
         {/* Timeline Header */}
-        <div className="flex ml-48 border-b border-slate-800 pt-2">
+        <div className="flex ml-20 md:ml-48 border-b border-slate-800 pt-2">
           {months.map((m, i) => (
-            <div key={i} className="text-center text-sm font-semibold text-slate-400 py-2 border-r border-slate-800/50" style={{ width: `${(m.span / totalDays) * 100}%` }}>
+            <div key={i} className="text-center text-xs md:text-sm font-semibold text-slate-400 py-2 border-r border-slate-800/50 truncate px-1" style={{ width: `${(m.span / totalDays) * 100}%` }}>
               {m.label.charAt(0).toUpperCase() + m.label.slice(1)}
             </div>
           ))}

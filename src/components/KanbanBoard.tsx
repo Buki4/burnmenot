@@ -70,14 +70,14 @@ export function KanbanBoard({ initialTasks, tracks }: { initialTasks: Task[], tr
   };
 
   return (
-    <div className="flex-1 flex gap-6 overflow-x-auto pb-4">
+    <div className="flex-1 flex flex-col md:flex-row gap-6 overflow-x-hidden md:overflow-x-auto pb-4">
       {STATUSES.map(status => {
         const columnTasks = tasks.filter(t => t.status === status);
         
         return (
           <div 
             key={status} 
-            className="flex-1 min-w-[300px] bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-4 flex flex-col"
+            className="flex-1 w-full md:min-w-[300px] bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-4 flex flex-col"
             onDrop={(e) => handleDrop(e, status)}
             onDragOver={allowDrop}
           >

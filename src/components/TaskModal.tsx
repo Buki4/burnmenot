@@ -43,9 +43,10 @@ export function TaskModal({ tracks }: { tracks: any[] }) {
     <>
       <button 
         onClick={() => setIsOpen(true)}
-        className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-full font-medium transition-colors shadow-lg shadow-orange-500/30 whitespace-nowrap w-full md:w-auto"
+        className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 md:px-6 md:py-2 text-sm md:text-base rounded-full font-medium transition-colors shadow-lg shadow-orange-500/30 whitespace-nowrap"
       >
-        + Новая задача
+        <span className="md:hidden">+ Задача</span>
+        <span className="hidden md:inline">+ Новая задача</span>
       </button>
 
       {isOpen && (
