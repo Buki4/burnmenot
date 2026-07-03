@@ -36,7 +36,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru">
-      <body className={`${inter.className} bg-[#020617] text-slate-200 min-h-screen flex flex-col md:flex-row antialiased selection:bg-orange-500/30`}>
+      <body className={`${inter.className} bg-[#020617] text-slate-200 h-[100dvh] overflow-hidden flex flex-col md:flex-row antialiased selection:bg-orange-500/30`}>
         <DragDropProvider>
           <TransitionProvider>
             <NextTopLoader color="#f97316" showSpinner={false} />
@@ -48,7 +48,7 @@ export default function RootLayout({
               }
             }} />
             <Sidebar />
-            <main className="flex-1 p-4 md:p-8 overflow-y-auto w-full md:w-auto h-[100dvh] pb-36 md:pb-8">
+            <main className="flex-1 p-4 md:p-8 overflow-y-auto w-full md:w-auto pb-36 md:pb-8 relative">
               {children}
               <DictationFab />
             </main>
