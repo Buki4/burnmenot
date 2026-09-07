@@ -22,3 +22,28 @@ export async function DELETE(
     );
   }
 }
+
+export async function PUT(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const body = await req.json();
+
+    const note = await prisma.note.update({
+      where: { id },
+      data: {
+        content: body.content,
+      },
+    });
+
+    return NextResponse.json(note);
+  } catch (error) {
+    console.error('Error updating note:', error);
+    return NextResponse.json(
+      { error: 'Failed to update note' },
+      { status: 500 }
+    );
+  }
+}
